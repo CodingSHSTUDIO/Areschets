@@ -1,0 +1,4368 @@
+local ARES = {}
+ARES.__index = ARES
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
+local HttpService = game:GetService("HttpService")
+local CoreGui = game:GetService("CoreGui")
+
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer and LocalPlayer:GetMouse()
+
+ARES.Version = "2.4.1"
+ARES.AnimationsEnabled = false
+ARES.Flags = {}
+ARES.OpenColorPickers = {}
+ARES.IconRaw = "https://raw.githubusercontent.com/Footagesus/Icons/main/Main-v2.lua"
+ARES.IconPack = "lucide"
+ARES.IconModule = nil
+ARES._ThemeObjects = {}
+ARES._TextObjects = {}
+ARES._LanguageListeners = {}
+ARES.Language = "ENG"
+ARES.AutoTranslate = true
+ARES.TranslationEndpoint = "https://translate.googleapis.com/translate_a/single"
+ARES._TranslationCache = {}
+ARES.LanguageTargets = {
+    ENG = "en",
+    SPA = "es",
+    RUS = "ru",
+    PHIL = "tl",
+    POR = "pt",
+    FRA = "fr",
+    GER = "de",
+    JPN = "ja",
+    KOR = "ko",
+    CHN = "zh-CN"
+}
+
+ARES.LanguageNames = {
+    ENG = "English",
+    SPA = "Spanish",
+    RUS = "Russian",
+    PHIL = "Filipino",
+    POR = "Portuguese",
+    FRA = "French",
+    GER = "German",
+    JPN = "Japanese",
+    KOR = "Korean",
+    CHN = "Chinese"
+}
+
+ARES.LanguagePhrases = {
+    ENG = {
+        Settings = "Settings",
+        Language = "Language",
+        RemoveWatermark = "Remove watermark",
+        ApplyingLanguage = "Applying language",
+        LanguageApplied = "Language applied",
+        LanguagePartiallyApplied = "Language partially applied"
+    },
+    SPA = {
+        Settings = "Ajustes",
+        Language = "Idioma",
+        RemoveWatermark = "Quitar marca de agua",
+        ApplyingLanguage = "Aplicando idioma",
+        LanguageApplied = "Idioma aplicado",
+        LanguagePartiallyApplied = "Idioma aplicado parcialmente"
+    },
+    POR = {
+        Settings = "Configuracoes",
+        Language = "Idioma",
+        RemoveWatermark = "Remover marca d'agua",
+        ApplyingLanguage = "Aplicando idioma",
+        LanguageApplied = "Idioma aplicado",
+        LanguagePartiallyApplied = "Idioma aplicado parcialmente"
+    },
+    FRA = {
+        Settings = "Parametres",
+        Language = "Langue",
+        RemoveWatermark = "Masquer le filigrane",
+        ApplyingLanguage = "Application de la langue",
+        LanguageApplied = "Langue appliquee",
+        LanguagePartiallyApplied = "Langue partiellement appliquee"
+    },
+    GER = {
+        Settings = "Einstellungen",
+        Language = "Sprache",
+        RemoveWatermark = "Wasserzeichen ausblenden",
+        ApplyingLanguage = "Sprache wird angewendet",
+        LanguageApplied = "Sprache angewendet",
+        LanguagePartiallyApplied = "Sprache teilweise angewendet"
+    },
+    RUS = {
+        Settings = "Настройки",
+        Language = "Язык",
+        RemoveWatermark = "Скрыть водяной знак",
+        ApplyingLanguage = "Применение языка",
+        LanguageApplied = "Язык применен",
+        LanguagePartiallyApplied = "Язык применен частично"
+    },
+    PHIL = {
+        Settings = "Mga Setting",
+        Language = "Wika",
+        RemoveWatermark = "Alisin ang watermark",
+        ApplyingLanguage = "Ina-apply ang wika",
+        LanguageApplied = "Na-apply ang wika",
+        LanguagePartiallyApplied = "Bahagyang na-apply ang wika"
+    },
+    JPN = {
+        Settings = "設定",
+        Language = "言語",
+        RemoveWatermark = "透かしを非表示",
+        ApplyingLanguage = "言語を適用中",
+        LanguageApplied = "言語を適用しました",
+        LanguagePartiallyApplied = "言語を一部適用しました"
+    },
+    KOR = {
+        Settings = "설정",
+        Language = "언어",
+        RemoveWatermark = "워터마크 숨기기",
+        ApplyingLanguage = "언어 적용 중",
+        LanguageApplied = "언어가 적용됨",
+        LanguagePartiallyApplied = "언어가 일부 적용됨"
+    },
+    CHN = {
+        Settings = "设置",
+        Language = "语言",
+        RemoveWatermark = "隐藏水印",
+        ApplyingLanguage = "正在应用语言",
+        LanguageApplied = "语言已应用",
+        LanguagePartiallyApplied = "语言已部分应用"
+    }
+}
+
+ARES.Themes = {
+    ARES = {
+        Accent = Color3.fromRGB(255, 0, 75),
+        Accent2 = Color3.fromRGB(255, 54, 112),
+        Background = Color3.fromRGB(9, 9, 13),
+        Background2 = Color3.fromRGB(13, 13, 19),
+        Background3 = Color3.fromRGB(18, 18, 26),
+        Background4 = Color3.fromRGB(23, 23, 32),
+        Stroke = Color3.fromRGB(32, 32, 44),
+        Stroke2 = Color3.fromRGB(44, 44, 58),
+        Text = Color3.fromRGB(236, 236, 245),
+        MutedText = Color3.fromRGB(152, 152, 168),
+        DimText = Color3.fromRGB(92, 92, 108),
+        Success = Color3.fromRGB(45, 214, 118),
+        Warning = Color3.fromRGB(255, 190, 70),
+        Error = Color3.fromRGB(255, 64, 100),
+    },
+    Midnight = {
+        Accent = Color3.fromRGB(90, 156, 255),
+        Accent2 = Color3.fromRGB(65, 118, 230),
+        Background = Color3.fromRGB(7, 10, 18),
+        Background2 = Color3.fromRGB(12, 17, 28),
+        Background3 = Color3.fromRGB(18, 25, 39),
+        Background4 = Color3.fromRGB(24, 34, 52),
+        Stroke = Color3.fromRGB(38, 50, 72),
+        Stroke2 = Color3.fromRGB(54, 70, 95),
+        Text = Color3.fromRGB(235, 242, 255),
+        MutedText = Color3.fromRGB(148, 163, 184),
+        DimText = Color3.fromRGB(82, 96, 119),
+        Success = Color3.fromRGB(66, 217, 145),
+        Warning = Color3.fromRGB(255, 196, 86),
+        Error = Color3.fromRGB(255, 89, 120),
+    },
+    Emerald = {
+        Accent = Color3.fromRGB(42, 224, 151),
+        Accent2 = Color3.fromRGB(20, 185, 122),
+        Background = Color3.fromRGB(8, 13, 12),
+        Background2 = Color3.fromRGB(12, 20, 18),
+        Background3 = Color3.fromRGB(17, 29, 25),
+        Background4 = Color3.fromRGB(23, 39, 33),
+        Stroke = Color3.fromRGB(34, 58, 49),
+        Stroke2 = Color3.fromRGB(48, 82, 69),
+        Text = Color3.fromRGB(234, 255, 247),
+        MutedText = Color3.fromRGB(151, 178, 167),
+        DimText = Color3.fromRGB(81, 111, 98),
+        Success = Color3.fromRGB(42, 224, 151),
+        Warning = Color3.fromRGB(255, 196, 86),
+        Error = Color3.fromRGB(255, 90, 100),
+    },
+    Amethyst = {
+        Accent = Color3.fromRGB(176, 113, 255),
+        Accent2 = Color3.fromRGB(131, 87, 255),
+        Background = Color3.fromRGB(12, 9, 18),
+        Background2 = Color3.fromRGB(18, 13, 27),
+        Background3 = Color3.fromRGB(25, 18, 38),
+        Background4 = Color3.fromRGB(34, 25, 49),
+        Stroke = Color3.fromRGB(49, 38, 70),
+        Stroke2 = Color3.fromRGB(68, 54, 95),
+        Text = Color3.fromRGB(245, 238, 255),
+        MutedText = Color3.fromRGB(174, 158, 196),
+        DimText = Color3.fromRGB(104, 88, 128),
+        Success = Color3.fromRGB(79, 220, 144),
+        Warning = Color3.fromRGB(255, 197, 89),
+        Error = Color3.fromRGB(255, 93, 139),
+    },
+    Solar = {
+        Accent = Color3.fromRGB(255, 182, 74),
+        Accent2 = Color3.fromRGB(255, 118, 67),
+        Background = Color3.fromRGB(16, 12, 8),
+        Background2 = Color3.fromRGB(24, 18, 13),
+        Background3 = Color3.fromRGB(34, 25, 18),
+        Background4 = Color3.fromRGB(45, 34, 25),
+        Stroke = Color3.fromRGB(70, 52, 36),
+        Stroke2 = Color3.fromRGB(96, 72, 48),
+        Text = Color3.fromRGB(255, 244, 226),
+        MutedText = Color3.fromRGB(196, 170, 139),
+        DimText = Color3.fromRGB(128, 99, 72),
+        Success = Color3.fromRGB(74, 214, 128),
+        Warning = Color3.fromRGB(255, 182, 74),
+        Error = Color3.fromRGB(255, 88, 88),
+    },
+    Frost = {
+        Accent = Color3.fromRGB(75, 210, 255),
+        Accent2 = Color3.fromRGB(115, 140, 255),
+        Background = Color3.fromRGB(8, 13, 17),
+        Background2 = Color3.fromRGB(13, 20, 26),
+        Background3 = Color3.fromRGB(18, 29, 37),
+        Background4 = Color3.fromRGB(25, 39, 49),
+        Stroke = Color3.fromRGB(37, 60, 75),
+        Stroke2 = Color3.fromRGB(54, 82, 101),
+        Text = Color3.fromRGB(231, 250, 255),
+        MutedText = Color3.fromRGB(145, 178, 190),
+        DimText = Color3.fromRGB(81, 112, 126),
+        Success = Color3.fromRGB(75, 224, 172),
+        Warning = Color3.fromRGB(255, 206, 94),
+        Error = Color3.fromRGB(255, 100, 118),
+    },
+}
+
+ARES.Theme = table.clone(ARES.Themes.ARES)
+
+local IS_MOBILE = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
+local DEFAULT_SIZE = IS_MOBILE and UDim2.fromOffset(535, 380) or UDim2.fromOffset(575, 390)
+
+local function round(n, decimals)
+    decimals = decimals or 0
+    local mult = 10 ^ decimals
+    return math.floor(n * mult + 0.5) / mult
+end
+
+local function clamp(value, minimum, maximum)
+    return math.max(minimum, math.min(maximum, value))
+end
+
+local function alphaFromRange(value, minimum, maximum)
+    if maximum == minimum then
+        return 0
+    end
+
+    return (value - minimum) / (maximum - minimum)
+end
+
+local function tween(instance, tweenInfo, properties)
+    if not ARES.AnimationsEnabled then
+        for property, value in pairs(properties) do
+            instance[property] = value
+        end
+
+        return nil
+    end
+
+    local animation = TweenService:Create(instance, tweenInfo, properties)
+    animation:Play()
+    return animation
+end
+
+local function isRbxAssetIcon(icon)
+    if typeof(icon) == "number" then
+        return true
+    end
+
+    return typeof(icon) == "string" and (icon:match("^%d+$") ~= nil or icon:find("^rbxasset") ~= nil)
+end
+
+local function create(className, properties, children)
+    local object = Instance.new(className)
+
+    for property, value in pairs(properties or {}) do
+        object[property] = value
+    end
+
+    for _, child in ipairs(children or {}) do
+        child.Parent = object
+    end
+
+    return object
+end
+
+local function corner(radius)
+    radius = math.min(radius or 4, 5)
+
+    return create("UICorner", {
+        CornerRadius = UDim.new(0, radius)
+    })
+end
+
+local function stroke(color, thickness, transparency)
+    return create("UIStroke", {
+        Color = color or ARES.Theme.Stroke,
+        Thickness = thickness or 1,
+        Transparency = transparency or 0,
+        ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    })
+end
+
+local function padding(left, right, top, bottom)
+    return create("UIPadding", {
+        PaddingLeft = UDim.new(0, left or 0),
+        PaddingRight = UDim.new(0, right or left or 0),
+        PaddingTop = UDim.new(0, top or left or 0),
+        PaddingBottom = UDim.new(0, bottom or top or left or 0)
+    })
+end
+
+local function listLayout(paddingPixels, horizontalAlignment)
+    return create("UIListLayout", {
+        Padding = UDim.new(0, paddingPixels or 6),
+        FillDirection = Enum.FillDirection.Vertical,
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        HorizontalAlignment = horizontalAlignment or Enum.HorizontalAlignment.Left
+    })
+end
+
+local function textSize(text, size, font, maxWidth)
+    local service = game:GetService("TextService")
+    return service:GetTextSize(tostring(text), size, font or Enum.Font.Gotham, Vector2.new(maxWidth or 1000, math.huge))
+end
+
+local function getThemeValue(key)
+    return ARES.Theme[key] or key
+end
+
+local function bindTheme(instance, bindings)
+    for _, item in ipairs(ARES._ThemeObjects) do
+        if item.Instance == instance then
+            for property, key in pairs(bindings) do
+                item.Bindings[property] = key
+                instance[property] = getThemeValue(key)
+            end
+
+            return instance
+        end
+    end
+
+    table.insert(ARES._ThemeObjects, {
+        Instance = instance,
+        Bindings = bindings
+    })
+
+    for property, key in pairs(bindings) do
+        instance[property] = getThemeValue(key)
+    end
+
+    return instance
+end
+
+local function applyThemeToRegistered()
+    for index = #ARES._ThemeObjects, 1, -1 do
+        local item = ARES._ThemeObjects[index]
+
+        if not item.Instance or not item.Instance.Parent then
+            table.remove(ARES._ThemeObjects, index)
+        else
+            for property, key in pairs(item.Bindings) do
+                item.Instance[property] = getThemeValue(key)
+            end
+        end
+    end
+end
+
+local function normalizeLanguage(language)
+    language = tostring(language or ARES.Language or "ENG"):upper()
+
+    if language == "ES" or language == "ESPANOL" or language == "SPANISH" then
+        return "SPA"
+    end
+
+    if language == "RU" or language == "RUSSIAN" then
+        return "RUS"
+    end
+
+    if language == "EN" or language == "ENGLISH" then
+        return "ENG"
+    end
+
+    if language == "TAGALOG" or language == "FILIPINO" or language == "FIL" then
+        return "PHIL"
+    end
+
+    if language == "PT" or language == "PORTUGUESE" then
+        return "POR"
+    end
+
+    if language == "FR" or language == "FRENCH" then
+        return "FRA"
+    end
+
+    if language == "DE" or language == "GERMAN" then
+        return "GER"
+    end
+
+    if language == "JP" or language == "JA" or language == "JAPANESE" then
+        return "JPN"
+    end
+
+    if language == "KR" or language == "KO" or language == "KOREAN" then
+        return "KOR"
+    end
+
+    if language == "CN" or language == "ZH" or language == "CHINESE" then
+        return "CHN"
+    end
+
+    return language
+end
+
+local function getLanguageName(language)
+    language = normalizeLanguage(language)
+    return ARES.LanguageNames[language] or language
+end
+
+local function getLanguagePhrase(key, language)
+    language = normalizeLanguage(language or ARES.Language)
+    local phrases = ARES.LanguagePhrases[language] or ARES.LanguagePhrases.ENG
+    return phrases[key] or ARES.LanguagePhrases.ENG[key] or tostring(key)
+end
+
+local function shouldTranslate(text)
+    local source = tostring(text or "")
+
+    if source == "" then
+        return false
+    end
+
+    if source:find("^%s*$") then
+        return false
+    end
+
+    if source:match("^%s*[%u%d_%-]+%s*$") and #source <= 8 then
+        return false
+    end
+
+    if source:match("^%s*#?[%x]+%s*$") then
+        return false
+    end
+
+    if source:find("ARES") or source:find("rbxassetid://") then
+        return false
+    end
+
+    return true
+end
+
+local function readTranslatedText(response)
+    local ok, decoded = pcall(function()
+        return HttpService:JSONDecode(response)
+    end)
+
+    if not ok or type(decoded) ~= "table" or type(decoded[1]) ~= "table" then
+        return nil
+    end
+
+    local parts = {}
+
+    for _, segment in ipairs(decoded[1]) do
+        if type(segment) == "table" and type(segment[1]) == "string" then
+            table.insert(parts, segment[1])
+        end
+    end
+
+    if #parts == 0 then
+        return nil
+    end
+
+    return table.concat(parts)
+end
+
+local function requestAutoTranslation(text, language)
+    local target = ARES.LanguageTargets[normalizeLanguage(language)]
+    local source = tostring(text or "")
+
+    if not ARES.AutoTranslate or not target or target == "en" or not shouldTranslate(source) then
+        return source
+    end
+
+    ARES._TranslationCache[target] = ARES._TranslationCache[target] or {}
+
+    if ARES._TranslationCache[target][source] then
+        return ARES._TranslationCache[target][source]
+    end
+
+    local url = ARES.TranslationEndpoint
+        .. "?client=gtx&sl=auto&tl="
+        .. HttpService:UrlEncode(target)
+        .. "&dt=t&q="
+        .. HttpService:UrlEncode(source)
+
+    local ok, response = pcall(function()
+        return game:HttpGet(url)
+    end)
+
+    if not ok or type(response) ~= "string" or response == "" then
+        ARES._TranslationCache[target][source] = source
+        return source
+    end
+
+    local translated = readTranslatedText(response) or source
+    ARES._TranslationCache[target][source] = translated
+    return translated
+end
+
+local function translateText(text, language)
+    local source = tostring(text or "")
+    language = normalizeLanguage(language)
+
+    if language == "ENG" then
+        return source
+    end
+
+    return requestAutoTranslation(source, language)
+end
+
+local function bindTranslation(instance, property, sourceText, formatter)
+    if not instance or not property then
+        return instance
+    end
+
+    for _, item in ipairs(ARES._TextObjects) do
+        if item.Instance == instance and item.Property == property then
+            item.Source = tostring(sourceText or "")
+            item.Formatter = formatter
+            instance[property] = formatter and formatter(translateText(item.Source)) or translateText(item.Source)
+            return instance
+        end
+    end
+
+    table.insert(ARES._TextObjects, {
+        Instance = instance,
+        Property = property,
+        Source = tostring(sourceText or ""),
+        Formatter = formatter
+    })
+
+    instance[property] = formatter and formatter(translateText(sourceText)) or translateText(sourceText)
+    return instance
+end
+
+local function applyTranslations()
+    for index = #ARES._TextObjects, 1, -1 do
+        local item = ARES._TextObjects[index]
+
+        if not item.Instance or not item.Instance.Parent then
+            table.remove(ARES._TextObjects, index)
+        else
+            local translated = translateText(item.Source)
+            item.Instance[item.Property] = item.Formatter and item.Formatter(translated) or translated
+        end
+    end
+end
+
+local function setLanguage(language)
+    ARES.Language = normalizeLanguage(language)
+    ARES.Flags.__Language = ARES.Language
+    applyTranslations()
+
+    for index = #ARES._LanguageListeners, 1, -1 do
+        local callback = ARES._LanguageListeners[index]
+
+        if type(callback) ~= "function" then
+            table.remove(ARES._LanguageListeners, index)
+        else
+            task.spawn(callback, ARES.Language)
+        end
+    end
+
+    return ARES.Language
+end
+
+local function getRemote(url)
+    local okHttpGet, result = pcall(function()
+        return game:HttpGet(url)
+    end)
+
+    if okHttpGet and result then
+        return result
+    end
+
+    local okService, serviceResult = pcall(function()
+        return HttpService:GetAsync(url)
+    end)
+
+    if okService then
+        return serviceResult
+    end
+
+    return nil
+end
+
+local function getIconModule()
+    if ARES.IconModule ~= nil then
+        return ARES.IconModule
+    end
+
+    local source = getRemote(ARES.IconRaw)
+    if not source or source == "" then
+        ARES.IconModule = false
+        return nil
+    end
+
+    local ok, module = pcall(function()
+        return loadstring(source)()
+    end)
+
+    if ok and type(module) == "table" then
+        ARES.IconModule = module
+        return module
+    end
+
+    ARES.IconModule = false
+    return nil
+end
+
+local function resolveIcon(icon, iconType)
+    if typeof(icon) == "number" then
+        return {
+            Image = "rbxassetid://" .. tostring(icon),
+            ImageRectSize = Vector2.new(0, 0),
+            ImageRectOffset = Vector2.new(0, 0)
+        }
+    end
+
+    if typeof(icon) ~= "string" or icon == "" then
+        return nil
+    end
+
+    if icon:match("^%d+$") then
+        return {
+            Image = "rbxassetid://" .. icon,
+            ImageRectSize = Vector2.new(0, 0),
+            ImageRectOffset = Vector2.new(0, 0)
+        }
+    end
+
+    if icon:find("^rbxasset") then
+        return {
+            Image = icon,
+            ImageRectSize = Vector2.new(0, 0),
+            ImageRectOffset = Vector2.new(0, 0)
+        }
+    end
+
+    local iconModule = getIconModule()
+    if not iconModule or not iconModule.Icon2 then
+        return nil
+    end
+
+    local ok, result = pcall(function()
+        return iconModule.Icon2(icon, iconType or ARES.IconPack)
+    end)
+
+    if not ok or not result then
+        return nil
+    end
+
+    if typeof(result) == "string" then
+        return {
+            Image = result,
+            ImageRectSize = Vector2.new(0, 0),
+            ImageRectOffset = Vector2.new(0, 0)
+        }
+    end
+
+    return {
+        Image = result[1],
+        ImageRectSize = result[2] and result[2].ImageRectSize or Vector2.new(0, 0),
+        ImageRectOffset = result[2] and result[2].ImageRectPosition or Vector2.new(0, 0)
+    }
+end
+
+local function createIcon(parent, icon, options)
+    options = options or {}
+
+    local iconData = resolveIcon(icon, options.Type)
+    local size = options.Size or UDim2.fromOffset(18, 18)
+    local position = options.Position or UDim2.fromOffset(0, 0)
+    local color = options.Color or ARES.Theme.Accent
+
+    if iconData then
+        local image = create("ImageLabel", {
+            BackgroundTransparency = 1,
+            Size = size,
+            Position = position,
+            Image = iconData.Image,
+            ImageRectSize = iconData.ImageRectSize,
+            ImageRectOffset = iconData.ImageRectOffset,
+            ImageColor3 = color,
+            ScaleType = Enum.ScaleType.Fit,
+            Parent = parent
+        })
+
+        if options.ThemeKey then
+            bindTheme(image, { ImageColor3 = options.ThemeKey })
+        end
+
+        return image
+    end
+
+    local fallback = options.Fallback or tostring(icon or "*"):sub(1, 1):upper()
+    local label = create("TextLabel", {
+        BackgroundTransparency = 1,
+        Size = size,
+        Position = position,
+        Text = fallback,
+        Font = Enum.Font.GothamBlack,
+        TextSize = options.TextSize or 13,
+        TextColor3 = color,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        Parent = parent
+    })
+
+    if options.ThemeKey then
+        bindTheme(label, { TextColor3 = options.ThemeKey })
+    end
+
+    return label
+end
+
+local function safeParent(screenGui)
+    local parent
+
+    if gethui then
+        local ok, hui = pcall(gethui)
+        if ok and hui then
+            parent = hui
+        end
+    end
+
+    if not parent then
+        local okCore = pcall(function()
+            screenGui.Parent = CoreGui
+        end)
+
+        if okCore then
+            return
+        end
+    end
+
+    if parent then
+        screenGui.Parent = parent
+        return
+    end
+
+    local playerGui = LocalPlayer and LocalPlayer:FindFirstChildOfClass("PlayerGui")
+    screenGui.Parent = playerGui or CoreGui
+end
+
+local function makeDraggable(handle, target)
+    local dragging = false
+    local dragStart
+    local startPosition
+
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPosition = target.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            target.Position = UDim2.new(
+                startPosition.X.Scale,
+                startPosition.X.Offset + delta.X,
+                startPosition.Y.Scale,
+                startPosition.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+
+local function bindHover(button, normalColor, hoverColor)
+    button.MouseEnter:Connect(function()
+        tween(button, TweenInfo.new(0.13, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            BackgroundColor3 = hoverColor
+        })
+    end)
+
+    button.MouseLeave:Connect(function()
+        tween(button, TweenInfo.new(0.13, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            BackgroundColor3 = normalColor
+        })
+    end)
+end
+
+local function createIconLabel(parent, icon, text)
+    local row = create("Frame", {
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 0, 22),
+        Parent = parent
+    })
+
+    local iconSurface = create("Frame", {
+        BackgroundColor3 = ARES.Theme.Background4,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(0, 1),
+        Size = UDim2.fromOffset(20, 20),
+        Parent = row
+    }, {
+        corner(4),
+        stroke(ARES.Theme.Stroke2, 1, 0.45)
+    })
+    bindTheme(iconSurface, { BackgroundColor3 = "Background4" })
+
+    createIcon(iconSurface, icon or "box", {
+        Size = UDim2.fromOffset(12, 12),
+        Position = UDim2.fromOffset(4, 4),
+        ThemeKey = "Accent",
+        Fallback = "*",
+        TextSize = 9
+    })
+
+    local title = create("TextLabel", {
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, -30, 1, 0),
+        Position = UDim2.fromOffset(28, 0),
+        Text = text or "Section",
+        Font = Enum.Font.GothamBold,
+        TextSize = 9,
+        TextColor3 = ARES.Theme.Text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = row
+    })
+    bindTheme(title, { TextColor3 = "Text" })
+    bindTranslation(title, "Text", text or "Section")
+
+    return row
+end
+
+local function updateCanvas(frame)
+    local layout = frame:FindFirstChildOfClass("UIListLayout")
+    if layout then
+        frame.CanvasSize = UDim2.fromOffset(0, layout.AbsoluteContentSize.Y + 10)
+    end
+end
+
+function ARES:Notify(options)
+    options = options or {}
+
+    local title = options.Title or "Notification"
+    local content = options.Content or options.Text or "Ready"
+    local duration = options.Duration or 3
+    local icon = options.Icon or "bell"
+
+    if not self.ScreenGui then
+        return
+    end
+
+    local container = self.NotificationContainer
+    if not container then
+        container = create("Frame", {
+            Name = "Notifications",
+            AnchorPoint = Vector2.new(1, 0),
+            Position = UDim2.new(1, -14, 0, 72),
+            Size = UDim2.fromOffset(260, 420),
+            BackgroundTransparency = 1,
+            Parent = self.ScreenGui
+        }, {
+            listLayout(9, Enum.HorizontalAlignment.Right)
+        })
+
+        self.NotificationContainer = container
+    end
+
+    local notification = create("Frame", {
+        BackgroundColor3 = ARES.Theme.Background2,
+        BackgroundTransparency = 1,
+        Size = UDim2.fromOffset(248, 66),
+        ClipsDescendants = true,
+        Parent = container
+    }, {
+        corner(8),
+        stroke(ARES.Theme.Stroke, 1, 0.18)
+    })
+    bindTheme(notification, { BackgroundColor3 = "Background2" })
+
+    local scale = create("UIScale", {
+        Scale = 0.96,
+        Parent = notification
+    })
+
+    local iconBubble = create("Frame", {
+        BackgroundColor3 = ARES.Theme.Background3,
+        Position = UDim2.fromOffset(12, 13),
+        Size = UDim2.fromOffset(30, 30),
+        Parent = notification
+    }, {
+        corner(7),
+        stroke(ARES.Theme.Stroke, 1, 0.35)
+    })
+    bindTheme(iconBubble, { BackgroundColor3 = "Background3" })
+
+    createIcon(iconBubble, icon, {
+        Size = UDim2.fromOffset(16, 16),
+        Position = UDim2.fromOffset(7, 7),
+        ThemeKey = "Accent",
+        Fallback = tostring(icon):sub(1, 1):upper(),
+        TextSize = 11
+    })
+
+    local titleLabel = create("TextLabel", {
+        BackgroundTransparency = 1,
+        Position = UDim2.fromOffset(52, 10),
+        Size = UDim2.new(1, -64, 0, 16),
+        Text = title,
+        Font = Enum.Font.GothamBold,
+        TextSize = 10,
+        TextColor3 = ARES.Theme.Text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = notification
+    })
+    bindTheme(titleLabel, { TextColor3 = "Text" })
+    bindTranslation(titleLabel, "Text", title)
+
+    local contentLabel = create("TextLabel", {
+        BackgroundTransparency = 1,
+        Position = UDim2.fromOffset(52, 28),
+        Size = UDim2.new(1, -64, 0, 24),
+        Text = content,
+        Font = Enum.Font.Gotham,
+        TextSize = 9,
+        TextWrapped = true,
+        TextColor3 = ARES.Theme.MutedText,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Top,
+        Parent = notification
+    })
+    bindTheme(contentLabel, { TextColor3 = "MutedText" })
+    bindTranslation(contentLabel, "Text", content)
+
+    notification.Position = UDim2.fromOffset(24, 0)
+    tween(notification, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        BackgroundTransparency = 0.02,
+        Position = UDim2.fromOffset(0, 0)
+    })
+
+    tween(scale, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        Scale = 1
+    })
+
+    task.delay(duration, function()
+        if notification and notification.Parent then
+            if not ARES.AnimationsEnabled then
+                notification:Destroy()
+                return
+            end
+
+            tween(notification, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                BackgroundTransparency = 1,
+                Position = UDim2.fromOffset(22, 0)
+            })
+
+            tween(scale, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                Scale = 0.96
+            })
+
+            task.wait(0.17)
+            if notification then
+                notification:Destroy()
+            end
+        end
+    end)
+end
+
+function ARES:CreateWatermark(options)
+    options = options or {}
+
+    if not self.ScreenGui then
+        return
+    end
+
+    if self.Watermark then
+        self.Watermark:Destroy()
+    end
+
+    local text = options.Text or "This is a watermark"
+    local watermarkIcon = options.Icon or "gem"
+
+    local frame = create("Frame", {
+        Name = "Watermark",
+        AnchorPoint = Vector2.new(1, 0),
+        Position = options.Position or UDim2.new(1, -16, 0, 10),
+        Size = UDim2.fromOffset(166, 28),
+        BackgroundColor3 = ARES.Theme.Background2,
+        Parent = self.ScreenGui
+    }, {
+        corner(7),
+        stroke(ARES.Theme.Stroke, 1, 0.08)
+    })
+    bindTheme(frame, { BackgroundColor3 = "Background2" })
+
+    createIcon(frame, watermarkIcon, {
+        Size = UDim2.fromOffset(16, 16),
+        Position = UDim2.fromOffset(10, 6),
+        ThemeKey = "Accent",
+        Fallback = "M",
+        TextSize = 12
+    })
+
+    local watermarkLabel = create("TextLabel", {
+        BackgroundTransparency = 1,
+        Position = UDim2.fromOffset(32, 0),
+        Size = UDim2.new(1, -38, 1, 0),
+        Text = text,
+        Font = Enum.Font.GothamSemibold,
+        TextSize = 10,
+        TextColor3 = ARES.Theme.Text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = frame
+    })
+    bindTheme(watermarkLabel, { TextColor3 = "Text" })
+
+    self.Watermark = frame
+    return frame
+end
+
+function ARES:CreateStatsPills()
+    if not self.ScreenGui then
+        return
+    end
+
+    if self.StatsPills then
+        self.StatsPills:Destroy()
+    end
+
+    local holder = create("Frame", {
+        Name = "StatsPills",
+        AnchorPoint = Vector2.new(1, 0),
+        Position = UDim2.new(1, -18, 0, 44),
+        Size = UDim2.fromOffset(72, 52),
+        BackgroundTransparency = 1,
+        Parent = self.ScreenGui
+    }, {
+        listLayout(6, Enum.HorizontalAlignment.Right)
+    })
+
+    local function pill(text)
+        local label = create("TextLabel", {
+            BackgroundColor3 = ARES.Theme.Background2,
+            Size = UDim2.fromOffset(64, 23),
+            Text = text,
+            Font = Enum.Font.GothamBold,
+            TextSize = 10,
+            TextColor3 = ARES.Theme.Text,
+            Parent = holder
+        }, {
+            corner(6),
+            stroke(ARES.Theme.Stroke, 1, 0.08)
+        })
+        bindTheme(label, { BackgroundColor3 = "Background2", TextColor3 = "Text" })
+        return label
+    end
+
+    local fpsLabel = pill("0 FPS")
+    local pingLabel = pill("0 ping")
+
+    local frames = 0
+    local last = os.clock()
+
+    RunService.RenderStepped:Connect(function()
+        if not holder.Parent then
+            return
+        end
+
+        frames += 1
+        local now = os.clock()
+
+        if now - last >= 1 then
+            fpsLabel.Text = tostring(frames) .. " FPS"
+            frames = 0
+            last = now
+
+            local ping = 0
+            pcall(function()
+                ping = Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+            end)
+            pingLabel.Text = tostring(math.floor(ping)) .. " ping"
+        end
+    end)
+
+    self.StatsPills = holder
+    return holder
+end
+
+function ARES:CreateStatusBar(options)
+    options = options or {}
+
+    if not self.ScreenGui then
+        return
+    end
+
+    if self.StatusBar then
+        self.StatusBar:Destroy()
+    end
+
+    local bar = create("Frame", {
+        Name = "StatusBar",
+        AnchorPoint = Vector2.new(0.5, 1),
+        Position = UDim2.new(0.5, 0, 1, -16),
+        Size = UDim2.fromOffset(0, 0),
+        AutomaticSize = Enum.AutomaticSize.XY,
+        BackgroundColor3 = ARES.Theme.Background2,
+        Parent = self.ScreenGui
+    }, {
+        corner(9),
+        stroke(ARES.Theme.Stroke, 1, 0.06),
+        padding(18, 18, 11, 11),
+        create("UIListLayout", {
+            FillDirection = Enum.FillDirection.Horizontal,
+            VerticalAlignment = Enum.VerticalAlignment.Center,
+            Padding = UDim.new(0, 14),
+            SortOrder = Enum.SortOrder.LayoutOrder
+        })
+    })
+    bindTheme(bar, { BackgroundColor3 = "Background2" })
+
+    local rowHeight = 18
+
+    local identity = create("Frame", {
+        BackgroundTransparency = 1,
+        Size = UDim2.fromOffset(0, rowHeight),
+        AutomaticSize = Enum.AutomaticSize.X,
+        Parent = bar
+    }, {
+        create("UIListLayout", {
+            FillDirection = Enum.FillDirection.Horizontal,
+            VerticalAlignment = Enum.VerticalAlignment.Center,
+            Padding = UDim.new(0, 8),
+            SortOrder = Enum.SortOrder.LayoutOrder
+        })
+    })
+
+    local iconHolder = create("Frame", {
+        BackgroundTransparency = 1,
+        Size = UDim2.fromOffset(rowHeight, rowHeight),
+        Parent = identity
+    })
+
+    createIcon(iconHolder, options.Icon or "gem", {
+        Size = UDim2.fromOffset(rowHeight, rowHeight),
+        Position = UDim2.fromOffset(0, 0),
+        ThemeKey = "Accent",
+        Fallback = "M",
+        TextSize = 13
+    })
+
+    local nameLabel = create("TextLabel", {
+        BackgroundTransparency = 1,
+        Size = UDim2.fromOffset(0, rowHeight),
+        AutomaticSize = Enum.AutomaticSize.X,
+        Text = options.Text or "ARES",
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        TextColor3 = ARES.Theme.Text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Center,
+        Parent = identity
+    })
+    bindTheme(nameLabel, { TextColor3 = "Text" })
+
+    local function divider()
+        return create("Frame", {
+            BackgroundColor3 = ARES.Theme.Stroke,
+            BorderSizePixel = 0,
+            Size = UDim2.fromOffset(1, rowHeight),
+            Parent = bar
+        })
+    end
+
+    local function statBlock(labelText)
+        local holder = create("Frame", {
+            BackgroundTransparency = 1,
+            Size = UDim2.fromOffset(0, rowHeight),
+            AutomaticSize = Enum.AutomaticSize.X,
+            Parent = bar
+        }, {
+            create("UIListLayout", {
+                FillDirection = Enum.FillDirection.Horizontal,
+                VerticalAlignment = Enum.VerticalAlignment.Center,
+                Padding = UDim.new(0, 5),
+                SortOrder = Enum.SortOrder.LayoutOrder
+            })
+        })
+
+        local label = create("TextLabel", {
+            BackgroundTransparency = 1,
+            Size = UDim2.fromOffset(0, rowHeight),
+            AutomaticSize = Enum.AutomaticSize.X,
+            Text = labelText,
+            Font = Enum.Font.GothamBold,
+            TextSize = 11,
+            TextColor3 = ARES.Theme.DimText,
+            TextYAlignment = Enum.TextYAlignment.Center,
+            Parent = holder
+        })
+        bindTheme(label, { TextColor3 = "DimText" })
+
+        local value = create("TextLabel", {
+            BackgroundTransparency = 1,
+            Size = UDim2.fromOffset(0, rowHeight),
+            AutomaticSize = Enum.AutomaticSize.X,
+            Text = "0",
+            Font = Enum.Font.GothamBold,
+            TextSize = 11,
+            TextColor3 = ARES.Theme.Accent,
+            TextYAlignment = Enum.TextYAlignment.Center,
+            Parent = holder
+        })
+        bindTheme(value, { TextColor3 = "Accent" })
+
+        return value
+    end
+
+    divider()
+    local fpsValue = statBlock("FPS:")
+    divider()
+    local pingValue = statBlock("PING:")
+
+    makeDraggable(bar, bar)
+
+    local frames = 0
+    local last = os.clock()
+
+    RunService.RenderStepped:Connect(function()
+        if not bar.Parent then
+            return
+        end
+
+        frames += 1
+        local now = os.clock()
+
+        if now - last >= 1 then
+            fpsValue.Text = tostring(frames)
+            frames = 0
+            last = now
+
+            local ping = 0
+            pcall(function()
+                ping = Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+            end)
+            pingValue.Text = tostring(math.floor(ping)) .. "ms"
+        end
+    end)
+
+    self.StatusBar = bar
+    return bar
+end
+
+function ARES:CreateWindow(options)
+    options = options or {}
+
+    if options.Theme then
+        self:SetTheme(options.Theme)
+    end
+
+    if options.Language then
+        ARES.Language = normalizeLanguage(options.Language)
+        ARES.Flags.__Language = ARES.Language
+    end
+
+    local title = options.Title or "ARES"
+    local subtitle = options.SubTitle or options.Subtitle or "DaMenu"
+    local size = options.Size or DEFAULT_SIZE
+    local position = options.Position or UDim2.new(0.5, -size.X.Offset / 2, 0.5, -size.Y.Offset / 2)
+
+    local screenGui = create("ScreenGui", {
+        Name = options.Name or "ARESUILibrary",
+        ResetOnSpawn = false,
+        IgnoreGuiInset = true,
+        ZIndexBehavior = Enum.ZIndexBehavior.Global
+    })
+
+    safeParent(screenGui)
+
+    self.ScreenGui = screenGui
+    self.Flags = ARES.Flags
+
+    local window = {}
+    window.Library = self
+    window.Tabs = {}
+    window.ActiveTab = nil
+
+    local main = create("CanvasGroup", {
+        Name = "MainWindow",
+        BackgroundColor3 = ARES.Theme.Background,
+        BackgroundTransparency = 0.02,
+        GroupTransparency = 0,
+        BorderSizePixel = 0,
+        Position = position,
+        Size = size,
+        ClipsDescendants = true,
+        ZIndex = 1,
+        Parent = screenGui
+    }, {
+        corner(9),
+        stroke(ARES.Theme.Stroke, 1, 0.08)
+    })
+    bindTheme(main, { BackgroundColor3 = "Background" })
+
+    local mainScale = create("UIScale", {
+        Scale = 1,
+        Parent = main
+    })
+
+    local mainSheenGradient = create("UIGradient", {
+        Rotation = 90,
+        Offset = Vector2.new(0, 0),
+        Color = ColorSequence.new(Color3.fromRGB(255, 255, 255)),
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.93),
+            NumberSequenceKeypoint.new(1, 1)
+        })
+    })
+
+    local mainSheen = create("Frame", {
+        Name = "Sheen",
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+        BackgroundTransparency = 0.86,
+        BorderSizePixel = 0,
+        Size = UDim2.new(1, 0, 0, 140),
+        ZIndex = 1,
+        Parent = main
+    }, { mainSheenGradient })
+
+    local topBar = create("Frame", {
+        Name = "TopBar",
+        BackgroundColor3 = ARES.Theme.Background2,
+        BorderSizePixel = 0,
+        Size = UDim2.new(1, 0, 0, 40),
+        Parent = main
+    }, {
+        create("UIGradient", {
+            Rotation = 0,
+            Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, ARES.Theme.Background3),
+                ColorSequenceKeypoint.new(1, ARES.Theme.Background2)
+            })
+        })
+    })
+    bindTheme(topBar, { BackgroundColor3 = "Background2" })
+
+    local topAccent = create("Frame", {
+        Name = "TopAccent",
+        AnchorPoint = Vector2.new(0.5, 0),
+        BackgroundColor3 = ARES.Theme.Accent,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0.5, 0, 1, -1),
+        Size = UDim2.new(1, -20, 0, 1),
+        BackgroundTransparency = 0.22,
+        Parent = topBar
+    })
+    bindTheme(topAccent, { BackgroundColor3 = "Accent" })
+
+    local innerGlow = create("Frame", {
+        Name = "InnerGlow",
+        BackgroundColor3 = ARES.Theme.Accent,
+        BackgroundTransparency = 0.92,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(0, 40),
+        Size = UDim2.new(1, 0, 0, 70),
+        ZIndex = 2,
+        Parent = main
+    }, {
+        create("UIGradient", {
+            Rotation = 90,
+            Color = ColorSequence.new(ARES.Theme.Accent),
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0.72),
+                NumberSequenceKeypoint.new(1, 1)
+            })
+        })
+    })
+    bindTheme(innerGlow, { BackgroundColor3 = "Accent" })
+
+    local windowIconValue = options.Icon or "gem"
+    local windowIconIsAsset = isRbxAssetIcon(windowIconValue)
+    local windowIconSurface = create("Frame", {
+        BackgroundColor3 = ARES.Theme.Background3,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(6, 4),
+        Size = UDim2.fromOffset(32, 32),
+        Parent = topBar
+    }, {
+        corner(5),
+        stroke(ARES.Theme.Stroke2, 1, 0.38)
+    })
+    bindTheme(windowIconSurface, { BackgroundColor3 = "Background3" })
+
+    createIcon(windowIconSurface, windowIconValue, {
+        Size = windowIconIsAsset and UDim2.fromOffset(28, 28) or UDim2.fromOffset(18, 18),
+        Position = windowIconIsAsset and UDim2.fromOffset(2, 2) or UDim2.fromOffset(7, 7),
+        Color = windowIconIsAsset and Color3.fromRGB(255, 255, 255) or ARES.Theme.Accent,
+        ThemeKey = windowIconIsAsset and nil or "Accent",
+        Fallback = "M",
+        TextSize = 13
+    })
+
+    local titleLabel = create("TextLabel", {
+        BackgroundTransparency = 1,
+        Position = UDim2.fromOffset(46, 0),
+        Size = UDim2.fromOffset(170, 40),
+        Text = title,
+        Font = Enum.Font.GothamBlack,
+        TextSize = 11,
+        TextColor3 = ARES.Theme.Accent,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = topBar
+    })
+    bindTheme(titleLabel, { TextColor3 = "Accent" })
+
+    local subtitleLabel = create("TextLabel", {
+        AnchorPoint = Vector2.new(1, 0),
+        BackgroundTransparency = 1,
+        Position = UDim2.new(1, -12, 0, 0),
+        Size = UDim2.fromOffset(110, 40),
+        Text = subtitle,
+        Font = Enum.Font.GothamSemibold,
+        TextSize = 8,
+        TextColor3 = ARES.Theme.DimText,
+        TextXAlignment = Enum.TextXAlignment.Right,
+        Parent = topBar
+    })
+    bindTheme(subtitleLabel, { TextColor3 = "DimText" })
+
+    local tabStrip = create("Frame", {
+        Name = "TabStrip",
+        AnchorPoint = Vector2.new(0, 1),
+        BackgroundColor3 = ARES.Theme.Background2,
+        Position = UDim2.new(0, 10, 1, -10),
+        Size = UDim2.fromOffset(0, 32),
+        AutomaticSize = Enum.AutomaticSize.X,
+        Parent = main
+    }, {
+        corner(6),
+        padding(4, 4, 4, 4),
+        create("UIListLayout", {
+            Padding = UDim.new(0, 5),
+            FillDirection = Enum.FillDirection.Horizontal,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            VerticalAlignment = Enum.VerticalAlignment.Center
+        })
+    })
+    bindTheme(tabStrip, { BackgroundColor3 = "Background2" })
+
+    local contentFrame = create("Frame", {
+        Name = "Content",
+        BackgroundTransparency = 1,
+        Position = UDim2.fromOffset(10, 50),
+        Size = UDim2.new(1, -20, 1, -96),
+        Parent = main
+    })
+
+    local contentSurface = create("Frame", {
+        Name = "ContentSurface",
+        BackgroundColor3 = ARES.Theme.Background2,
+        BackgroundTransparency = 0.28,
+        BorderSizePixel = 0,
+        Size = UDim2.fromScale(1, 1),
+        ZIndex = 1,
+        Parent = contentFrame
+    }, {
+        corner(7),
+        stroke(ARES.Theme.Stroke, 1, 0.42)
+    })
+    bindTheme(contentSurface, { BackgroundColor3 = "Background2" })
+
+    makeDraggable(topBar, main)
+
+    local controlDock = create("Frame", {
+        AnchorPoint = Vector2.new(1, 0.5),
+        BackgroundColor3 = ARES.Theme.Background3,
+        Position = UDim2.new(1, -24, 0, 62),
+        Size = UDim2.fromOffset(62, 28),
+        Parent = main
+    }, {
+        corner(6),
+        stroke(ARES.Theme.Stroke, 1, 0.28)
+    })
+    bindTheme(controlDock, { BackgroundColor3 = "Background3" })
+
+    local controlHighlight = create("Frame", {
+        BackgroundColor3 = ARES.Theme.Background4,
+        Position = UDim2.fromOffset(4, 4),
+        Size = UDim2.fromOffset(25, 20),
+        Parent = controlDock
+    }, {
+        corner(5)
+    })
+    bindTheme(controlHighlight, { BackgroundColor3 = "Background4" })
+
+    local minimizeButton = create("TextButton", {
+        BackgroundTransparency = 1,
+        Position = UDim2.fromOffset(4, 4),
+        Size = UDim2.fromOffset(25, 20),
+        Text = "",
+        AutoButtonColor = false,
+        Parent = controlDock
+    })
+
+    createIcon(minimizeButton, "minimize-2", {
+        Size = UDim2.fromOffset(13, 13),
+        Position = UDim2.fromOffset(6, 3),
+        ThemeKey = "Accent",
+        Fallback = "-"
+    })
+
+    local closeButton = create("TextButton", {
+        BackgroundTransparency = 1,
+        Position = UDim2.fromOffset(33, 4),
+        Size = UDim2.fromOffset(25, 20),
+        Text = "",
+        AutoButtonColor = false,
+        Parent = controlDock
+    })
+
+    createIcon(closeButton, "power", {
+        Size = UDim2.fromOffset(13, 13),
+        Position = UDim2.fromOffset(6, 3),
+        ThemeKey = "Error",
+        Fallback = "P"
+    })
+
+    local function slideControlHighlight(targetX, tint)
+        tween(controlHighlight, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+            Position = UDim2.fromOffset(targetX, 4),
+            BackgroundColor3 = tint or ARES.Theme.Background4
+        })
+    end
+
+    local restoreButton = create("TextButton", {
+        Name = "RestoreButton",
+        AnchorPoint = Vector2.new(0, 0.5),
+        BackgroundColor3 = ARES.Theme.Background2,
+        BackgroundTransparency = 1,
+        Position = options.MinimizedIconPosition or UDim2.new(0, 18, 0.5, 0),
+        Size = UDim2.fromOffset(42, 42),
+        Text = "",
+        AutoButtonColor = false,
+        Visible = false,
+        ClipsDescendants = true,
+        Parent = screenGui
+    }, {
+        corner(8),
+        stroke(ARES.Theme.Stroke, 1, 0.08)
+    })
+    bindTheme(restoreButton, { BackgroundColor3 = "Background2" })
+
+    local minimizedIconValue = options.MinimizedIcon or options.FloatingIcon or options.RestoreIcon or "maximize-2"
+    local minimizedIconIsAsset = isRbxAssetIcon(minimizedIconValue)
+    local restoreIcon = createIcon(restoreButton, minimizedIconValue, {
+        Size = minimizedIconIsAsset and UDim2.fromOffset(30, 30) or UDim2.fromOffset(20, 20),
+        Position = minimizedIconIsAsset and UDim2.fromOffset(6, 6) or UDim2.fromOffset(11, 11),
+        Color = minimizedIconIsAsset and Color3.fromRGB(255, 255, 255) or ARES.Theme.Accent,
+        ThemeKey = minimizedIconIsAsset and nil or "Accent",
+        Fallback = "R",
+        TextSize = 14
+    })
+
+    local restoreScale = create("UIScale", {
+        Scale = 0.88,
+        Parent = restoreButton
+    })
+
+    makeDraggable(restoreButton, restoreButton)
+
+    local savedMainPosition = main.Position
+    local minimized = false
+
+    local function setRestoreIconTransparency(value)
+        if restoreIcon:IsA("ImageLabel") then
+            restoreIcon.ImageTransparency = value
+        else
+            restoreIcon.TextTransparency = value
+        end
+    end
+
+    local function showRestoreButton()
+        restoreButton.Visible = true
+        restoreButton.BackgroundTransparency = 0.02
+        restoreScale.Scale = 1
+        setRestoreIconTransparency(0)
+    end
+
+    local function hideRestoreButton()
+        restoreButton.Visible = false
+        restoreButton.BackgroundTransparency = 0.02
+        restoreScale.Scale = 1
+        setRestoreIconTransparency(0)
+    end
+
+    local function minimizeWindow()
+        if minimized then
+            return
+        end
+
+        minimized = true
+        savedMainPosition = main.Position
+        main.Visible = false
+        main.GroupTransparency = 0
+        mainScale.Scale = 1
+        showRestoreButton()
+    end
+
+    local function restoreWindow()
+        if not minimized and main.Visible then
+            return
+        end
+
+        minimized = false
+        main.Position = savedMainPosition
+        main.GroupTransparency = 0
+        mainScale.Scale = 1
+        main.Visible = true
+        hideRestoreButton()
+    end
+
+    minimizeButton.MouseEnter:Connect(function()
+        slideControlHighlight(4, ARES.Theme.Background4)
+    end)
+
+    closeButton.MouseEnter:Connect(function()
+        slideControlHighlight(33, ARES.Theme.Background4)
+    end)
+
+    controlDock.MouseLeave:Connect(function()
+        slideControlHighlight(4, ARES.Theme.Background4)
+    end)
+
+    minimizeButton.MouseButton1Click:Connect(function()
+        slideControlHighlight(4, ARES.Theme.Background4)
+        minimizeWindow()
+    end)
+
+    closeButton.MouseButton1Click:Connect(function()
+        if screenGui and screenGui.Parent then
+            screenGui:Destroy()
+        end
+    end)
+
+    restoreButton.MouseButton1Click:Connect(restoreWindow)
+
+    local languageChoices = options.Languages or { "ENG", "SPA", "POR", "FRA", "GER", "RUS", "PHIL", "JPN", "KOR", "CHN" }
+    local quickLanguages = options.QuickLanguages or { languageChoices[1] or "ENG", languageChoices[2] or "SPA" }
+    local configOpen = false
+    local configTweenToken = 0
+    local languageButtons = {}
+    local quickLanguageButtons = {}
+    local languageSummary
+    local configTitleLabel
+    local languageTitleLabel
+    local removeWatermarkLabel
+    local languageLoadingRow
+    local languageLoadingSpinner
+    local languageLoadingText
+    local languageLoadingToken = 0
+    local changingLanguage = false
+    local configOptions = {
+        ShowWatermark = options.Watermark ~= false or options.StatusBar ~= false
+    }
+
+    local function setWatermarkVisible(state)
+        configOptions.ShowWatermark = state
+
+        if self.StatusBar then
+            self.StatusBar.Visible = state
+        end
+
+        if self.Watermark then
+            self.Watermark.Visible = state
+        end
+    end
+
+    local function createSettingToggle(parent, labelText, initialValue, callback)
+        local value = not not initialValue
+        local row = create("Frame", {
+            BackgroundColor3 = ARES.Theme.Background3,
+            BackgroundTransparency = 0.22,
+            Size = UDim2.new(1, 0, 0, 27),
+            Parent = parent
+        }, {
+            corner(4),
+            stroke(ARES.Theme.Stroke, 1, 0.52)
+        })
+        bindTheme(row, { BackgroundColor3 = "Background3" })
+
+        local label = create("TextLabel", {
+            BackgroundTransparency = 1,
+            Position = UDim2.fromOffset(9, 0),
+            Size = UDim2.new(1, -47, 1, 0),
+            Text = labelText,
+            Font = Enum.Font.GothamSemibold,
+            TextSize = 9,
+            TextColor3 = ARES.Theme.Text,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = row
+        })
+        bindTheme(label, { TextColor3 = "Text" })
+        bindTranslation(label, "Text", labelText)
+
+        local button = create("TextButton", {
+            AnchorPoint = Vector2.new(1, 0.5),
+            BackgroundColor3 = ARES.Theme.Background2,
+            Position = UDim2.new(1, -8, 0.5, 0),
+            Size = UDim2.fromOffset(26, 14),
+            Text = "",
+            AutoButtonColor = false,
+            Parent = row
+        }, {
+            corner(3),
+            stroke(ARES.Theme.Stroke2, 1, 0.58)
+        })
+        bindTheme(button, { BackgroundColor3 = "Background2" })
+
+        local fill = create("Frame", {
+            BackgroundColor3 = ARES.Theme.Accent,
+            BackgroundTransparency = value and 0 or 1,
+            BorderSizePixel = 0,
+            Position = UDim2.fromOffset(3, 3),
+            Size = value and UDim2.new(1, -6, 1, -6) or UDim2.fromOffset(0, 8),
+            Parent = button
+        }, {
+            corner(2)
+        })
+        bindTheme(fill, { BackgroundColor3 = "Accent" })
+
+        local function setValue(nextValue)
+            value = not not nextValue
+            tween(fill, TweenInfo.new(0.16, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                BackgroundTransparency = value and 0 or 1,
+                Size = value and UDim2.new(1, -6, 1, -6) or UDim2.fromOffset(0, 8)
+            })
+
+            if callback then
+                callback(value)
+            end
+        end
+
+        button.MouseButton1Click:Connect(function()
+            setValue(not value)
+        end)
+
+        setValue(value)
+
+        return {
+            Set = setValue,
+            Get = function()
+                return value
+            end,
+            Label = label
+        }
+    end
+
+    local function refreshLanguageButtons(language)
+        language = normalizeLanguage(language)
+
+        if languageSummary then
+            languageSummary.Text = getLanguageName(language) .. " / " .. language
+        end
+
+        if configTitleLabel then
+            configTitleLabel.Text = getLanguagePhrase("Settings", language)
+        end
+
+        if languageTitleLabel then
+            languageTitleLabel.Text = getLanguagePhrase("Language", language)
+        end
+
+        if removeWatermarkLabel then
+            removeWatermarkLabel.Text = getLanguagePhrase("RemoveWatermark", language)
+        end
+
+        for _, item in ipairs(languageButtons) do
+            local selected = normalizeLanguage(item.Language) == language
+            bindTheme(item.Button, {
+                BackgroundColor3 = selected and "Accent" or "Background3"
+            })
+
+            tween(item.Button, TweenInfo.new(0.16, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                BackgroundColor3 = selected and ARES.Theme.Accent or ARES.Theme.Background3,
+                BackgroundTransparency = selected and 0.08 or 0.28
+            })
+
+            if item.Stroke then
+                tween(item.Stroke, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    Color = selected and ARES.Theme.Accent2 or ARES.Theme.Stroke,
+                    Transparency = selected and 0.12 or 0.62
+                })
+            end
+
+            if item.Code then
+                bindTheme(item.Code, { TextColor3 = selected and "Text" or "MutedText" })
+            end
+
+            if item.Name then
+                bindTheme(item.Name, { TextColor3 = selected and "Text" or "DimText" })
+            end
+
+            if item.Dot then
+                item.Dot.Text = selected and ">" or ""
+                tween(item.Dot, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    TextTransparency = selected and 0 or 1
+                })
+            end
+        end
+
+        for _, item in ipairs(quickLanguageButtons) do
+            local selected = normalizeLanguage(item.Language) == language
+            bindTheme(item.Button, {
+                BackgroundColor3 = selected and "Background4" or "Background2",
+                TextColor3 = selected and "Accent" or "DimText"
+            })
+
+            tween(item.Button, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundTransparency = selected and 0.02 or 0.12
+            })
+        end
+    end
+
+    local function applyLanguageChange(language, callback)
+        language = normalizeLanguage(language)
+
+        if changingLanguage then
+            return
+        end
+
+        if language == ARES.Language then
+            refreshLanguageButtons(language)
+            return
+        end
+
+        languageLoadingToken += 1
+        local token = languageLoadingToken
+        changingLanguage = true
+        local finished = false
+
+        if languageSummary then
+            languageSummary.Text = getLanguageName(language) .. " / " .. language
+        end
+
+        if languageLoadingRow then
+            languageLoadingRow.Visible = true
+            languageLoadingRow.BackgroundTransparency = 0.12
+            tween(languageLoadingRow, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundTransparency = 0.06
+            })
+        end
+
+        if languageLoadingText then
+            languageLoadingText.Text = getLanguagePhrase("ApplyingLanguage", language) .. "..."
+            languageLoadingText.TextTransparency = 0
+        end
+
+        if languageLoadingSpinner then
+            languageLoadingSpinner.Visible = true
+            languageLoadingSpinner.Rotation = 0
+            task.spawn(function()
+                while token == languageLoadingToken and changingLanguage and languageLoadingSpinner and languageLoadingSpinner.Parent do
+                    local spinnerTween = TweenService:Create(languageLoadingSpinner, TweenInfo.new(0.42, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {
+                        Rotation = languageLoadingSpinner.Rotation + 180
+                    })
+                    spinnerTween:Play()
+                    task.wait(0.42)
+                end
+            end)
+        end
+
+        local function finishLoading(success)
+            if finished or token ~= languageLoadingToken then
+                return
+            end
+
+            finished = true
+            changingLanguage = false
+
+            if languageLoadingText then
+                languageLoadingText.Text = getLanguagePhrase(success and "LanguageApplied" or "LanguagePartiallyApplied", ARES.Language)
+            end
+
+            task.delay(0.38, function()
+                if token ~= languageLoadingToken then
+                    return
+                end
+
+                if languageLoadingRow and languageLoadingRow.Parent then
+                    tween(languageLoadingRow, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        BackgroundTransparency = 1
+                    })
+                end
+
+                if languageLoadingText then
+                    tween(languageLoadingText, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        TextTransparency = 1
+                    })
+                end
+
+                task.delay(0.17, function()
+                    if token == languageLoadingToken and languageLoadingRow and languageLoadingRow.Parent then
+                        languageLoadingRow.Visible = false
+                        languageLoadingRow.BackgroundTransparency = 0.12
+                        if languageLoadingSpinner then
+                            languageLoadingSpinner.Visible = false
+                            languageLoadingSpinner.Rotation = 0
+                        end
+                    end
+                end)
+            end)
+        end
+
+        task.delay(3.2, function()
+            finishLoading(false)
+        end)
+
+        task.spawn(function()
+            local ok, nextLanguage = pcall(setLanguage, language)
+
+            if ok and callback then
+                task.spawn(callback, nextLanguage)
+            end
+
+            finishLoading(ok)
+        end)
+    end
+
+    if options.ConfigButton ~= false then
+        local quickCount = math.min(#quickLanguages, 2)
+        local bottomDock = create("Frame", {
+            AnchorPoint = Vector2.new(1, 1),
+            BackgroundTransparency = 1,
+            Position = UDim2.new(1, -10, 1, -10),
+            Size = UDim2.fromOffset(34 + quickCount * 44, 32),
+            ZIndex = 24,
+            Parent = main
+        }, {
+            create("UIListLayout", {
+                Padding = UDim.new(0, 6),
+                FillDirection = Enum.FillDirection.Horizontal,
+                HorizontalAlignment = Enum.HorizontalAlignment.Right,
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                VerticalAlignment = Enum.VerticalAlignment.Center
+            })
+        })
+
+        local configButton = create("TextButton", {
+            BackgroundColor3 = ARES.Theme.Background2,
+            Size = UDim2.fromOffset(32, 32),
+            Text = "",
+            AutoButtonColor = false,
+            LayoutOrder = 1,
+            ZIndex = 25,
+            Parent = bottomDock
+        }, {
+            corner(5),
+            stroke(ARES.Theme.Stroke, 1, 0.18)
+        })
+        bindTheme(configButton, { BackgroundColor3 = "Background2" })
+        local configIcon = createIcon(configButton, "settings", {
+            Size = UDim2.fromOffset(15, 15),
+            Position = UDim2.fromOffset(8, 8),
+            ThemeKey = "Accent",
+            Fallback = "S",
+            TextSize = 10
+        })
+
+        for index, language in ipairs(quickLanguages) do
+            if index <= 2 then
+                local quickButton = create("TextButton", {
+                    BackgroundColor3 = ARES.Theme.Background2,
+                    BackgroundTransparency = 0.12,
+                    Size = UDim2.fromOffset(38, 32),
+                    Text = normalizeLanguage(language),
+                    Font = Enum.Font.GothamBold,
+                    TextSize = 8,
+                    TextColor3 = ARES.Theme.DimText,
+                    AutoButtonColor = false,
+                    LayoutOrder = index + 1,
+                    ZIndex = 25,
+                    Parent = bottomDock
+                }, {
+                    corner(5),
+                    stroke(ARES.Theme.Stroke, 1, 0.24)
+                })
+
+                table.insert(quickLanguageButtons, {
+                    Button = quickButton,
+                    Language = language
+                })
+
+                quickButton.MouseButton1Click:Connect(function()
+                    applyLanguageChange(language, options.LanguageCallback)
+                end)
+            end
+        end
+
+        local configPanelWidth = 250
+        local configPanelHeight = 274
+        local configPanel = create("CanvasGroup", {
+            AnchorPoint = Vector2.new(1, 1),
+            BackgroundColor3 = ARES.Theme.Background2,
+            BackgroundTransparency = 0.02,
+            GroupTransparency = 1,
+            Position = UDim2.new(1, -10, 1, -46),
+            Size = UDim2.fromOffset(configPanelWidth, configPanelHeight),
+            ClipsDescendants = true,
+            Visible = false,
+            ZIndex = 30,
+            Parent = main
+        }, {
+            corner(6),
+            stroke(ARES.Theme.Stroke, 1, 1),
+            padding(11, 11, 10, 11)
+        })
+        bindTheme(configPanel, { BackgroundColor3 = "Background2" })
+        local configStroke = configPanel:FindFirstChildOfClass("UIStroke")
+        local configScale = create("UIScale", {
+            Scale = 0.98,
+            Parent = configPanel
+        })
+
+        local configList = create("Frame", {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 1, 0),
+            ZIndex = 31,
+            Parent = configPanel
+        }, {
+            listLayout(7, Enum.HorizontalAlignment.Left)
+        })
+
+        local configHeader = create("Frame", {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 24),
+            Parent = configList
+        })
+
+        configTitleLabel = create("TextLabel", {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 1, 0),
+            Text = getLanguagePhrase("Settings", ARES.Language),
+            Font = Enum.Font.GothamBold,
+            TextSize = 11,
+            TextColor3 = ARES.Theme.Text,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = configHeader
+        })
+        bindTheme(configTitleLabel, { TextColor3 = "Text" })
+
+        languageSummary = create("TextLabel", {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 13),
+            Text = getLanguageName(ARES.Language) .. " / " .. ARES.Language,
+            Font = Enum.Font.Gotham,
+            TextSize = 8,
+            TextColor3 = ARES.Theme.MutedText,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = configList
+        })
+        bindTheme(languageSummary, { TextColor3 = "MutedText" })
+
+        languageTitleLabel = create("TextLabel", {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 12),
+            Text = getLanguagePhrase("Language", ARES.Language),
+            Font = Enum.Font.GothamSemibold,
+            TextSize = 8,
+            TextColor3 = ARES.Theme.DimText,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = configList
+        })
+        bindTheme(languageTitleLabel, { TextColor3 = "DimText" })
+
+        local languageGrid = create("ScrollingFrame", {
+            BackgroundColor3 = ARES.Theme.Background,
+            BackgroundTransparency = 0.38,
+            Size = UDim2.new(1, 0, 0, 118),
+            CanvasSize = UDim2.fromOffset(0, 0),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y,
+            ClipsDescendants = true,
+            BorderSizePixel = 0,
+            ScrollBarThickness = 3,
+            ScrollBarImageColor3 = ARES.Theme.Accent,
+            ScrollingDirection = Enum.ScrollingDirection.Y,
+            ScrollingEnabled = #languageChoices > 4,
+            Parent = configList
+        }, {
+            corner(5),
+            stroke(ARES.Theme.Stroke, 1, 0.68),
+            padding(6, 6, 6, 6),
+            listLayout(5, Enum.HorizontalAlignment.Left)
+        })
+        bindTheme(languageGrid, { BackgroundColor3 = "Background", ScrollBarImageColor3 = "Accent" })
+
+        languageLoadingRow = create("Frame", {
+            BackgroundColor3 = ARES.Theme.Background3,
+            BackgroundTransparency = 0.12,
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, 0, 0, 28),
+            Visible = false,
+            Parent = configList
+        }, {
+            corner(5),
+            stroke(ARES.Theme.Stroke, 1, 0.55)
+        })
+        bindTheme(languageLoadingRow, { BackgroundColor3 = "Background3" })
+
+        languageLoadingSpinner = createIcon(languageLoadingRow, "loader-circle", {
+            Size = UDim2.fromOffset(14, 14),
+            Position = UDim2.fromOffset(8, 7),
+            ThemeKey = "Accent",
+            Fallback = "*",
+            TextSize = 12
+        })
+
+        languageLoadingText = create("TextLabel", {
+            BackgroundTransparency = 1,
+            Position = UDim2.fromOffset(30, 0),
+            Size = UDim2.new(1, -38, 1, 0),
+            Text = "",
+            Font = Enum.Font.GothamSemibold,
+            TextSize = 8,
+            TextColor3 = ARES.Theme.MutedText,
+            TextTransparency = 1,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = languageLoadingRow
+        })
+        bindTheme(languageLoadingText, { TextColor3 = "MutedText" })
+
+        local function chooseLanguage(language)
+            applyLanguageChange(language, options.LanguageCallback)
+        end
+
+        for index, language in ipairs(languageChoices) do
+            local normalizedLanguage = normalizeLanguage(language)
+            local button = create("TextButton", {
+                BackgroundColor3 = ARES.Theme.Background3,
+                BackgroundTransparency = 0.28,
+                LayoutOrder = index,
+                Size = UDim2.new(1, 0, 0, 30),
+                Text = "",
+                Font = Enum.Font.GothamBold,
+                TextSize = 8,
+                TextColor3 = ARES.Theme.MutedText,
+                AutoButtonColor = false,
+                Parent = languageGrid
+            }, {
+                corner(5)
+            })
+            local buttonScale = create("UIScale", {
+                Scale = 1,
+                Parent = button
+            })
+            local buttonStroke = stroke(ARES.Theme.Stroke, 1, 0.62)
+            buttonStroke.Parent = button
+
+            local languageDot = create("TextLabel", {
+                AnchorPoint = Vector2.new(1, 0.5),
+                BackgroundTransparency = 1,
+                Position = UDim2.new(1, -10, 0.5, 0),
+                Size = UDim2.fromOffset(14, 14),
+                Text = "",
+                Font = Enum.Font.GothamBold,
+                TextSize = 10,
+                TextColor3 = ARES.Theme.Text,
+                TextTransparency = 1,
+                Parent = button
+            })
+            bindTheme(languageDot, { TextColor3 = "Text" })
+
+            local codePill = create("Frame", {
+                BackgroundColor3 = ARES.Theme.Background2,
+                BackgroundTransparency = 0.08,
+                Position = UDim2.fromOffset(6, 5),
+                Size = UDim2.fromOffset(38, 20),
+                Parent = button
+            }, {
+                corner(4),
+                stroke(ARES.Theme.Stroke, 1, 0.62)
+            })
+            bindTheme(codePill, { BackgroundColor3 = "Background2" })
+
+            local codeLabel = create("TextLabel", {
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(1, 1),
+                Text = normalizedLanguage,
+                Font = Enum.Font.GothamBold,
+                TextSize = 9,
+                TextColor3 = ARES.Theme.MutedText,
+                TextXAlignment = Enum.TextXAlignment.Center,
+                Parent = codePill
+            })
+            bindTheme(codeLabel, { TextColor3 = "MutedText" })
+
+            local nameLabel = create("TextLabel", {
+                BackgroundTransparency = 1,
+                Position = UDim2.fromOffset(52, 0),
+                Size = UDim2.new(1, -78, 1, 0),
+                Text = getLanguageName(language),
+                Font = Enum.Font.GothamSemibold,
+                TextSize = 9,
+                TextColor3 = ARES.Theme.DimText,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextTruncate = Enum.TextTruncate.AtEnd,
+                Parent = button
+            })
+            bindTheme(nameLabel, { TextColor3 = "DimText" })
+
+            table.insert(languageButtons, {
+                Button = button,
+                Scale = buttonScale,
+                Stroke = buttonStroke,
+                Dot = languageDot,
+                Code = codeLabel,
+                Name = nameLabel,
+                Language = language
+            })
+
+            button.MouseEnter:Connect(function()
+                if normalizeLanguage(ARES.Language) ~= normalizedLanguage then
+                    tween(button, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        BackgroundTransparency = 0.14
+                    })
+                    tween(buttonStroke, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Transparency = 0.34
+                    })
+                end
+            end)
+
+            button.MouseLeave:Connect(function()
+                if normalizeLanguage(ARES.Language) ~= normalizedLanguage then
+                    tween(button, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        BackgroundTransparency = 0.28
+                    })
+                    tween(buttonStroke, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Transparency = 0.62
+                    })
+                end
+            end)
+
+            button.MouseButton1Click:Connect(function()
+                tween(buttonScale, TweenInfo.new(0.06, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    Scale = 0.96
+                })
+                task.delay(0.06, function()
+                    if buttonScale and buttonScale.Parent then
+                tween(buttonScale, TweenInfo.new(0.12, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                            Scale = 1
+                        })
+                    end
+                end)
+                chooseLanguage(language)
+            end)
+        end
+
+        local removeWatermarkToggle = createSettingToggle(configList, "Remove watermark", not configOptions.ShowWatermark, function(value)
+            setWatermarkVisible(not value)
+        end)
+        removeWatermarkLabel = removeWatermarkToggle.Label
+        removeWatermarkLabel.Text = getLanguagePhrase("RemoveWatermark", ARES.Language)
+
+        for _, descendant in ipairs(configPanel:GetDescendants()) do
+            if descendant:IsA("GuiObject") then
+                descendant.ZIndex = 31
+            end
+        end
+
+        for _, descendant in ipairs(bottomDock:GetDescendants()) do
+            if descendant:IsA("GuiObject") then
+                descendant.ZIndex = 26
+            end
+        end
+
+        local function setConfigOpen(state)
+            configTweenToken += 1
+            local token = configTweenToken
+            configOpen = state
+            configPanel.Visible = true
+            if state then
+                configPanel.Position = UDim2.new(1, -10, 1, -46)
+                configPanel.GroupTransparency = 1
+                configScale.Scale = 0.99
+            end
+
+            tween(configButton, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundColor3 = state and ARES.Theme.Background4 or ARES.Theme.Background2
+            })
+
+            tween(configPanel, TweenInfo.new(state and 0.16 or 0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                GroupTransparency = state and 0 or 1,
+                Position = UDim2.new(1, -10, 1, state and -50 or -46)
+            })
+
+            tween(configScale, TweenInfo.new(state and 0.16 or 0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Scale = state and 1 or 0.99
+            })
+
+            if configStroke then
+                tween(configStroke, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    Transparency = state and 0.22 or 1
+                })
+            end
+
+            task.delay(0.13, function()
+                if configPanel and configPanel.Parent and token == configTweenToken and not configOpen then
+                    configPanel.Visible = false
+                end
+            end)
+        end
+
+        configButton.MouseButton1Click:Connect(function()
+            setConfigOpen(not configOpen)
+        end)
+
+        table.insert(ARES._LanguageListeners, refreshLanguageButtons)
+        refreshLanguageButtons(ARES.Language)
+        languageSummary.Text = getLanguageName(ARES.Language) .. " / " .. normalizeLanguage(ARES.Language)
+    end
+
+    function window:SetVisible(state)
+        if state then
+            restoreWindow()
+        else
+            minimizeWindow()
+        end
+    end
+
+    function window:Toggle()
+        if minimized or not main.Visible then
+            restoreWindow()
+        else
+            minimizeWindow()
+        end
+    end
+
+    function window:Destroy()
+        screenGui:Destroy()
+    end
+
+    function window:SetTheme(themeNameOrTable)
+        self.Library:SetTheme(themeNameOrTable)
+    end
+
+    function window:SetLanguage(language)
+        return self.Library:SetLanguage(language)
+    end
+
+    function window:CreateTab(tabOptions)
+        tabOptions = tabOptions or {}
+
+        local tab = {}
+        tab.Window = window
+        tab.Sections = {}
+        tab.Name = tabOptions.Name or "Tab"
+
+        local page = create("CanvasGroup", {
+            Name = tab.Name .. "Page",
+            BackgroundTransparency = 1,
+            GroupTransparency = 1,
+            Position = UDim2.fromOffset(0, 0),
+            Size = UDim2.fromScale(1, 1),
+            Visible = false,
+            ClipsDescendants = true,
+            Parent = contentFrame
+        })
+
+        local pageScale = create("UIScale", {
+            Scale = 1,
+            Parent = page
+        })
+
+        local columns = create("Frame", {
+            BackgroundTransparency = 1,
+            Size = UDim2.fromScale(1, 1),
+            Parent = page
+        }, {
+            create("UIListLayout", {
+                Padding = UDim.new(0, 9),
+                FillDirection = Enum.FillDirection.Horizontal,
+                SortOrder = Enum.SortOrder.LayoutOrder
+            })
+        })
+
+        local leftScroller = create("ScrollingFrame", {
+            Name = "Left",
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ScrollBarThickness = 2,
+            ScrollBarImageColor3 = ARES.Theme.Accent,
+            Size = UDim2.new(0.5, -4.5, 1, 0),
+            CanvasSize = UDim2.fromOffset(0, 0),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y,
+            Parent = columns
+        }, {
+            listLayout(7, Enum.HorizontalAlignment.Left)
+        })
+        bindTheme(leftScroller, { ScrollBarImageColor3 = "Accent" })
+
+        local rightScroller = create("ScrollingFrame", {
+            Name = "Right",
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ScrollBarThickness = 2,
+            ScrollBarImageColor3 = ARES.Theme.Accent,
+            Size = UDim2.new(0.5, -4.5, 1, 0),
+            CanvasSize = UDim2.fromOffset(0, 0),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y,
+            Parent = columns
+        }, {
+            listLayout(7, Enum.HorizontalAlignment.Left)
+        })
+        bindTheme(rightScroller, { ScrollBarImageColor3 = "Accent" })
+
+        leftScroller.ChildAdded:Connect(function()
+            task.defer(updateCanvas, leftScroller)
+        end)
+
+        rightScroller.ChildAdded:Connect(function()
+            task.defer(updateCanvas, rightScroller)
+        end)
+
+        local tabButtonWidth = math.max(76, textSize(tab.Name, 9, Enum.Font.GothamSemibold).X + 34)
+        local inactiveTabWidth = 28
+        local tabButton = create("TextButton", {
+            BackgroundColor3 = ARES.Theme.Background3,
+            Size = UDim2.fromOffset(inactiveTabWidth, 22),
+            Text = "",
+            AutoButtonColor = false,
+            ClipsDescendants = true,
+            Parent = tabStrip
+        }, {
+            corner(5),
+            stroke(ARES.Theme.Stroke, 1, 0.45)
+        })
+        bindTheme(tabButton, { BackgroundColor3 = "Background3" })
+
+        local tabButtonScale = create("UIScale", {
+            Scale = 1,
+            Parent = tabButton
+        })
+
+        local tabIcon = createIcon(tabButton, tabOptions.Icon or "circle", {
+            Size = UDim2.fromOffset(12, 12),
+            Position = UDim2.fromOffset(8, 5),
+            Fallback = "*",
+            TextSize = 9
+        })
+        if tabIcon:IsA("ImageLabel") then
+            tabIcon.ImageColor3 = ARES.Theme.MutedText
+            bindTheme(tabIcon, { ImageColor3 = "MutedText" })
+        else
+            tabIcon.TextColor3 = ARES.Theme.MutedText
+            bindTheme(tabIcon, { TextColor3 = "MutedText" })
+        end
+
+        local tabLabel = create("TextLabel", {
+            BackgroundTransparency = 1,
+            Position = UDim2.fromOffset(25, 0),
+            Size = UDim2.new(1, -29, 1, 0),
+            Text = tab.Name,
+            Font = Enum.Font.GothamSemibold,
+            TextSize = 9,
+            TextColor3 = ARES.Theme.Text,
+            TextTransparency = 1,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = tabButton
+        })
+        bindTheme(tabLabel, { TextColor3 = "Text" })
+        bindTranslation(tabLabel, "Text", tab.Name)
+
+        local function setActive()
+            if window.ActiveTab == tab then
+                return
+            end
+
+            local previousTab = window.ActiveTab
+            window._TabTransitionToken = (window._TabTransitionToken or 0) + 1
+            local transitionToken = window._TabTransitionToken
+
+            for _, other in ipairs(window.Tabs) do
+                if other ~= previousTab then
+                    other.Page.Visible = false
+                end
+                bindTheme(other.Button, { BackgroundColor3 = "Background3" })
+                tween(other.Button, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    BackgroundColor3 = ARES.Theme.Background3,
+                    Size = UDim2.fromOffset(other.InactiveWidth, 22)
+                })
+
+                tween(other.Label, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    TextTransparency = 1
+                })
+
+                if other.Icon:IsA("ImageLabel") then
+                    bindTheme(other.Icon, { ImageColor3 = "MutedText" })
+                    tween(other.Icon, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        ImageColor3 = ARES.Theme.MutedText,
+                        Position = UDim2.fromOffset(8, 5)
+                    })
+                else
+                    bindTheme(other.Icon, { TextColor3 = "MutedText" })
+                    tween(other.Icon, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        TextColor3 = ARES.Theme.MutedText,
+                        Position = UDim2.fromOffset(8, 5)
+                    })
+                end
+            end
+
+
+            if previousTab and previousTab.Page.Visible then
+                tween(previousTab.Page, TweenInfo.new(0.09, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                    GroupTransparency = 1
+                })
+                task.delay(0.09, function()
+                    if previousTab.Page.Parent and transitionToken == window._TabTransitionToken and window.ActiveTab ~= previousTab then
+                        previousTab.Page.Visible = false
+                    end
+                end)
+            end
+
+            window.ActiveTab = tab
+            page.Visible = true
+            page.GroupTransparency = 1
+            page.Position = UDim2.fromOffset(0, 0)
+            pageScale.Scale = 1
+            tween(page, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                GroupTransparency = 0
+            })
+            bindTheme(tabButton, { BackgroundColor3 = "Background4" })
+            tween(tabButton, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundColor3 = ARES.Theme.Background4,
+                Size = UDim2.fromOffset(tabButtonWidth, 22)
+            })
+
+            tween(tabLabel, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                TextTransparency = 0
+            })
+
+            if tabIcon:IsA("ImageLabel") then
+                bindTheme(tabIcon, { ImageColor3 = "Accent" })
+                tween(tabIcon, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    ImageColor3 = ARES.Theme.Accent,
+                    Position = UDim2.fromOffset(8, 5)
+                })
+            else
+                bindTheme(tabIcon, { TextColor3 = "Accent" })
+                tween(tabIcon, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    TextColor3 = ARES.Theme.Accent,
+                    Position = UDim2.fromOffset(8, 5)
+                })
+            end
+        end
+
+        tabButton.MouseButton1Down:Connect(function()
+            tween(tabButtonScale, TweenInfo.new(0.07, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Scale = 0.98
+            })
+        end)
+
+        tabButton.MouseButton1Up:Connect(function()
+            tween(tabButtonScale, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Scale = 1
+            })
+        end)
+
+        tabButton.MouseLeave:Connect(function()
+            tween(tabButtonScale, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Scale = 1
+            })
+        end)
+
+        tabButton.MouseButton1Click:Connect(setActive)
+
+        tab.Page = page
+        tab.Button = tabButton
+        tab.Icon = tabIcon
+        tab.Label = tabLabel
+        tab.PageScale = pageScale
+        tab.Index = #window.Tabs + 1
+        tab.ActiveWidth = tabButtonWidth
+        tab.InactiveWidth = inactiveTabWidth
+        tab.Left = leftScroller
+        tab.Right = rightScroller
+
+        function tab:CreateSection(sectionOptions)
+            sectionOptions = sectionOptions or {}
+
+            local side = tostring(sectionOptions.Side or "Left")
+            local parent = side:lower() == "right" and rightScroller or leftScroller
+
+            local section = {}
+            section.Tab = tab
+
+            local holder = create("Frame", {
+                BackgroundColor3 = ARES.Theme.Background3,
+                BackgroundTransparency = 0,
+                Size = UDim2.new(1, -2, 0, 20),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                Parent = parent
+            }, {
+                corner(8),
+                stroke(ARES.Theme.Stroke2, 1, 0.36),
+                padding(10, 10, 10, 10),
+                listLayout(8, Enum.HorizontalAlignment.Left)
+            })
+            bindTheme(holder, { BackgroundColor3 = "Background3" })
+
+            if sectionOptions.Name then
+                createIconLabel(holder, sectionOptions.Icon or "*", sectionOptions.Name)
+            end
+
+            local function controlBase(height)
+                local frame = create("Frame", {
+                    BackgroundColor3 = ARES.Theme.Background4,
+                    BackgroundTransparency = 0,
+                    Size = UDim2.new(1, 0, 0, height or 30),
+                    Parent = holder
+                }, {
+                    corner(5),
+                    stroke(ARES.Theme.Stroke2, 1, 0.48)
+                })
+                bindTheme(frame, { BackgroundColor3 = "Background4" })
+                return frame
+            end
+
+            function section:CreateDivider()
+                local divider = create("Frame", {
+                    BackgroundColor3 = ARES.Theme.Stroke,
+                    BorderSizePixel = 0,
+                    Size = UDim2.new(1, 0, 0, 1),
+                    Parent = holder
+                })
+
+                return divider
+            end
+
+            function section:CreateLabel(labelOptions)
+                labelOptions = labelOptions or {}
+
+                local label = create("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, 0, 0, 16),
+                    Text = labelOptions.Text or labelOptions.Name or "Label",
+                    Font = Enum.Font.GothamSemibold,
+                    TextSize = 9,
+                    TextColor3 = labelOptions.Color or ARES.Theme.MutedText,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = holder
+                })
+                if not labelOptions.Color then
+                    bindTheme(label, { TextColor3 = "MutedText" })
+                end
+                bindTranslation(label, "Text", labelOptions.Text or labelOptions.Name or "Label")
+
+                return {
+                    Instance = label,
+                    Set = function(_, text)
+                        bindTranslation(label, "Text", text)
+                    end
+                }
+            end
+
+            function section:CreateParagraph(paragraphOptions)
+                paragraphOptions = paragraphOptions or {}
+
+                local paragraph = controlBase(55)
+
+                local title = create("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(8, 6),
+                    Size = UDim2.new(1, -16, 0, 13),
+                    Text = paragraphOptions.Title or "Paragraph",
+                    Font = Enum.Font.GothamBold,
+                    TextSize = 9,
+                    TextColor3 = ARES.Theme.Text,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = paragraph
+                })
+                bindTheme(title, { TextColor3 = "Text" })
+                bindTranslation(title, "Text", paragraphOptions.Title or "Paragraph")
+
+                local body = create("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(8, 21),
+                    Size = UDim2.new(1, -16, 1, -25),
+                    Text = paragraphOptions.Content or paragraphOptions.Text or "Content",
+                    Font = Enum.Font.Gotham,
+                    TextSize = 8,
+                    TextWrapped = true,
+                    TextColor3 = ARES.Theme.MutedText,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextYAlignment = Enum.TextYAlignment.Top,
+                    Parent = paragraph
+                })
+                bindTheme(body, { TextColor3 = "MutedText" })
+                bindTranslation(body, "Text", paragraphOptions.Content or paragraphOptions.Text or "Content")
+
+                return {
+                    Instance = paragraph,
+                    Set = function(_, text)
+                        bindTranslation(body, "Text", text)
+                    end
+                }
+            end
+
+            function section:CreateButton(buttonOptions)
+                buttonOptions = buttonOptions or {}
+
+                local button = create("TextButton", {
+                    BackgroundColor3 = ARES.Theme.Background4,
+                    Size = UDim2.new(1, 0, 0, 28),
+                    Text = buttonOptions.Icon and ("   " .. (buttonOptions.Name or "Button")) or (buttonOptions.Name or "Button"),
+                    Font = Enum.Font.GothamBold,
+                    TextSize = 9,
+                    TextColor3 = ARES.Theme.Text,
+                    AutoButtonColor = false,
+                    Parent = holder
+                }, {
+                    corner(4),
+                    stroke(ARES.Theme.Stroke, 1, 0.38)
+                })
+                bindTheme(button, { BackgroundColor3 = "Background4", TextColor3 = "Text" })
+                bindTranslation(button, "Text", buttonOptions.Name or "Button", buttonOptions.Icon and function(text)
+                    return "   " .. text
+                end or nil)
+
+                if buttonOptions.Icon then
+                    createIcon(button, buttonOptions.Icon, {
+                        Size = UDim2.fromOffset(13, 13),
+                        Position = UDim2.fromOffset(9, 8),
+                        ThemeKey = "Accent",
+                        Fallback = "*",
+                        TextSize = 9
+                    })
+                end
+
+                bindHover(button, ARES.Theme.Background4, ARES.Theme.Stroke2)
+
+                button.MouseButton1Click:Connect(function()
+                    tween(button, TweenInfo.new(0.06, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Size = UDim2.new(1, -2, 0, 28)
+                    })
+
+                    tween(button, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        BackgroundColor3 = ARES.Theme.Background4
+                    })
+
+                    task.delay(0.08, function()
+                        if button.Parent then
+                            tween(button, TweenInfo.new(0.12, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                                Size = UDim2.new(1, 0, 0, 28)
+                            })
+
+                            tween(button, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                                BackgroundColor3 = ARES.Theme.Background4
+                            })
+                        end
+                    end)
+
+                    if buttonOptions.Callback then
+                        task.spawn(buttonOptions.Callback)
+                    end
+                end)
+
+                return {
+                    Instance = button,
+                    Set = function(_, text)
+                        bindTranslation(button, "Text", text, buttonOptions.Icon and function(translated)
+                            return "   " .. translated
+                        end or nil)
+                    end
+                }
+            end
+
+            function section:CreateToggle(toggleOptions)
+                toggleOptions = toggleOptions or {}
+
+                local flag = toggleOptions.Flag
+                local value = toggleOptions.Default or false
+
+                if flag then
+                    ARES.Flags[flag] = value
+                end
+
+                local base = controlBase(34)
+
+                local label = create("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(8, 0),
+                    Size = UDim2.new(1, -40, 1, 0),
+                    Text = toggleOptions.Name or "Enable Toggle",
+                    Font = Enum.Font.GothamSemibold,
+                    TextSize = 10,
+                    TextColor3 = ARES.Theme.Text,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = base
+                })
+                bindTheme(label, { TextColor3 = "Text" })
+                bindTranslation(label, "Text", toggleOptions.Name or "Enable Toggle")
+
+                local toggleButton = create("TextButton", {
+                    AnchorPoint = Vector2.new(1, 0.5),
+                    BackgroundColor3 = Color3.fromRGB(8, 12, 18),
+                    Position = UDim2.new(1, -8, 0.5, 0),
+                    Size = UDim2.fromOffset(18, 18),
+                    Text = "",
+                    AutoButtonColor = false,
+                    Parent = base
+                }, {
+                    corner(4)
+                })
+                local toggleStroke = stroke(value and ARES.Theme.Accent or ARES.Theme.Stroke2, 1, value and 0.15 or 0.55)
+                toggleStroke.Parent = toggleButton
+
+                local activeTrack = create("Frame", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    BackgroundColor3 = ARES.Theme.Accent,
+                    BackgroundTransparency = value and 0 or 1,
+                    BorderSizePixel = 0,
+                    Position = UDim2.fromScale(0.5, 0.5),
+                    Size = value and UDim2.new(1, -6, 1, -6) or UDim2.fromOffset(0, 0),
+                    Parent = toggleButton
+                }, {
+                    corner(3)
+                })
+                bindTheme(activeTrack, { BackgroundColor3 = "Accent" })
+
+                local activePulse = create("Frame", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    BackgroundColor3 = ARES.Theme.Accent,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    Position = UDim2.fromScale(0.5, 0.5),
+                    Size = UDim2.fromOffset(18, 18),
+                    Parent = toggleButton
+                }, {
+                    corner(4)
+                })
+                bindTheme(activePulse, { BackgroundColor3 = "Accent" })
+
+                local api = {}
+
+                function api:Set(newValue)
+                    value = not not newValue
+
+                    if flag then
+                        ARES.Flags[flag] = value
+                    end
+
+                    tween(toggleButton, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                        BackgroundColor3 = value and Color3.fromRGB(12, 17, 25) or Color3.fromRGB(8, 12, 18)
+                    })
+
+                    tween(toggleStroke, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Color = value and ARES.Theme.Accent or ARES.Theme.Stroke2,
+                        Transparency = value and 0.15 or 0.55
+                    })
+
+                    tween(activeTrack, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                        BackgroundTransparency = value and 0 or 1,
+                        Size = value and UDim2.new(1, -6, 1, -6) or UDim2.fromOffset(0, 0)
+                    })
+
+                    if value then
+                        activePulse.BackgroundTransparency = 0.55
+                        activePulse.Size = UDim2.fromOffset(18, 18)
+
+                        tween(activePulse, TweenInfo.new(0.24, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            BackgroundTransparency = 1,
+                            Size = UDim2.fromOffset(28, 28)
+                        })
+                    end
+
+                    if toggleOptions.Callback then
+                        task.spawn(toggleOptions.Callback, value)
+                    end
+                end
+
+                function api:Get()
+                    return value
+                end
+
+                toggleButton.MouseButton1Click:Connect(function()
+                    api:Set(not value)
+                end)
+
+                base.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        api:Set(not value)
+                    end
+                end)
+
+                return api
+            end
+
+            function section:CreateSlider(sliderOptions)
+                sliderOptions = sliderOptions or {}
+
+                local minimum = sliderOptions.Min or sliderOptions.Minimum or 0
+                local maximum = sliderOptions.Max or sliderOptions.Maximum or 100
+                local decimals = sliderOptions.Decimals or 0
+                local suffix = sliderOptions.Suffix or ""
+                local flag = sliderOptions.Flag
+                local value = clamp(sliderOptions.Default or minimum, minimum, maximum)
+
+                if flag then
+                    ARES.Flags[flag] = value
+                end
+
+                local base = controlBase(48)
+
+                local sliderLabel = create("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(8, 5),
+                    Size = UDim2.new(1, -70, 0, 12),
+                    Text = sliderOptions.Name or "Slider Drag",
+                    Font = Enum.Font.GothamSemibold,
+                    TextSize = 10,
+                    TextColor3 = ARES.Theme.Text,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = base
+                })
+                bindTheme(sliderLabel, { TextColor3 = "Text" })
+                bindTranslation(sliderLabel, "Text", sliderOptions.Name or "Slider Drag")
+
+                local valueLabel = create("TextLabel", {
+                    AnchorPoint = Vector2.new(1, 0),
+                    BackgroundTransparency = 1,
+                    Position = UDim2.new(1, -8, 0, 5),
+                    Size = UDim2.fromOffset(62, 12),
+                    Text = tostring(value) .. suffix,
+                    Font = Enum.Font.GothamBold,
+                    TextSize = 9,
+                    TextColor3 = ARES.Theme.Text,
+                    TextXAlignment = Enum.TextXAlignment.Right,
+                    Parent = base
+                })
+                bindTheme(valueLabel, { TextColor3 = "Text" })
+
+                local sliderHitbox = create("Frame", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(8, 25),
+                    Size = UDim2.new(1, -16, 0, 16),
+                    Parent = base
+                })
+
+                local bar = create("Frame", {
+                    BackgroundColor3 = Color3.fromRGB(12, 17, 24),
+                    BorderSizePixel = 0,
+                    ClipsDescendants = true,
+                    Position = UDim2.new(0, 0, 0.5, -2),
+                    Size = UDim2.new(1, 0, 0, 4),
+                    Parent = sliderHitbox
+                }, {
+                    corner(4)
+                })
+                local barStroke = stroke(ARES.Theme.Stroke2, 1, 0.72)
+                barStroke.Parent = bar
+
+                local fillGlow = create("Frame", {
+                    BackgroundColor3 = ARES.Theme.Accent,
+                    BackgroundTransparency = 0.72,
+                    BorderSizePixel = 0,
+                    Position = UDim2.new(0, 0, 0.5, -4),
+                    Size = UDim2.new(alphaFromRange(value, minimum, maximum), 0, 0, 8),
+                    Parent = sliderHitbox
+                }, {
+                    corner(8)
+                })
+                bindTheme(fillGlow, { BackgroundColor3 = "Accent" })
+
+                local fill = create("Frame", {
+                    BackgroundColor3 = ARES.Theme.Accent,
+                    BorderSizePixel = 0,
+                    ClipsDescendants = true,
+                    Size = UDim2.fromScale(alphaFromRange(value, minimum, maximum), 1),
+                    Parent = bar
+                }, {
+                    corner(3)
+                })
+                bindTheme(fill, { BackgroundColor3 = "Accent" })
+
+                local fillSheen = create("Frame", {
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    BackgroundTransparency = 0.68,
+                    BorderSizePixel = 0,
+                    Position = UDim2.new(0, -26, 0, 0),
+                    Size = UDim2.fromOffset(24, 4),
+                    Parent = fill
+                }, {
+                    corner(4),
+                    create("UIGradient", {
+                        Rotation = 0,
+                        Transparency = NumberSequence.new({
+                            NumberSequenceKeypoint.new(0, 1),
+                            NumberSequenceKeypoint.new(0.5, 0),
+                            NumberSequenceKeypoint.new(1, 1)
+                        })
+                    })
+                })
+
+                local dragging = false
+                local api = {}
+
+                local function setFromAlpha(alpha, fireCallback)
+                    alpha = clamp(alpha, 0, 1)
+                    value = round(minimum + (maximum - minimum) * alpha, decimals)
+                    value = clamp(value, minimum, maximum)
+
+                    if flag then
+                        ARES.Flags[flag] = value
+                    end
+
+                    valueLabel.Text = tostring(value) .. suffix
+
+                    tween(fill, TweenInfo.new(0.09, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Size = UDim2.fromScale(alpha, 1)
+                    })
+
+                    tween(fillGlow, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Size = UDim2.new(alpha, 0, 0, dragging and 10 or 8),
+                        BackgroundTransparency = dragging and 0.58 or 0.72
+                    })
+
+                    fillSheen.Position = UDim2.new(0, -26, 0, 0)
+                    tween(fillSheen, TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Position = UDim2.new(1, 4, 0, 0)
+                    })
+
+                    if fireCallback and sliderOptions.Callback then
+                        task.spawn(sliderOptions.Callback, value)
+                    end
+                end
+
+                function api:Set(newValue)
+                    newValue = clamp(newValue, minimum, maximum)
+                    setFromAlpha(alphaFromRange(newValue, minimum, maximum), true)
+                end
+
+                function api:Get()
+                    return value
+                end
+
+                local function update(input)
+                    local x = input.Position.X
+                    local alpha = (x - sliderHitbox.AbsolutePosition.X) / sliderHitbox.AbsoluteSize.X
+                    setFromAlpha(alpha, true)
+                end
+
+                sliderHitbox.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        dragging = true
+                        tween(barStroke, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            Color = ARES.Theme.Accent,
+                            Transparency = 0.48
+                        })
+                        update(input)
+                    end
+                end)
+
+                UserInputService.InputChanged:Connect(function(input)
+                    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                        update(input)
+                    end
+                end)
+
+                UserInputService.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        dragging = false
+                        tween(fillGlow, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            Size = UDim2.new(alphaFromRange(value, minimum, maximum), 0, 0, 8),
+                            BackgroundTransparency = 0.72
+                        })
+                        tween(barStroke, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            Color = ARES.Theme.Stroke2,
+                            Transparency = 0.72
+                        })
+                    end
+                end)
+
+                return api
+            end
+
+            function section:CreateDropdown(dropdownOptions)
+                dropdownOptions = dropdownOptions or {}
+
+                local values = dropdownOptions.Values or dropdownOptions.Options or {}
+                local flag = dropdownOptions.Flag
+                local selected = dropdownOptions.Default or values[1] or "None"
+                local open = false
+
+                if flag then
+                    ARES.Flags[flag] = selected
+                end
+
+                local base = controlBase(54)
+
+                local dropdownLabel = create("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(8, 5),
+                    Size = UDim2.new(1, -16, 0, 12),
+                    Text = dropdownOptions.Name or "Build Parts",
+                    Font = Enum.Font.GothamSemibold,
+                    TextSize = 10,
+                    TextColor3 = ARES.Theme.Text,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = base
+                })
+                bindTheme(dropdownLabel, { TextColor3 = "Text" })
+                bindTranslation(dropdownLabel, "Text", dropdownOptions.Name or "Build Parts")
+
+                local selectButton = create("TextButton", {
+                    BackgroundColor3 = ARES.Theme.Background2,
+                    Position = UDim2.fromOffset(8, 23),
+                    Size = UDim2.new(1, -16, 0, 23),
+                    Text = "",
+                    AutoButtonColor = false,
+                    Parent = base
+                }, {
+                    corner(5)
+                })
+                bindTheme(selectButton, { BackgroundColor3 = "Background2" })
+                local selectStroke = stroke(ARES.Theme.Stroke, 1, 0.35)
+                selectStroke.Parent = selectButton
+
+                local selectedLabel = create("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(9, 0),
+                    Size = UDim2.new(1, -43, 1, 0),
+                    Text = tostring(selected),
+                    Font = Enum.Font.Gotham,
+                    TextSize = 9,
+                    TextColor3 = ARES.Theme.MutedText,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = selectButton
+                })
+                bindTheme(selectedLabel, { TextColor3 = "MutedText" })
+                bindTranslation(selectedLabel, "Text", tostring(selected))
+
+                local arrowBox = create("Frame", {
+                    AnchorPoint = Vector2.new(1, 0),
+                    BackgroundColor3 = ARES.Theme.Background3,
+                    Position = UDim2.new(1, -4, 0, 4),
+                    Size = UDim2.fromOffset(18, 15),
+                    Parent = selectButton
+                }, {
+                    corner(4)
+                })
+                bindTheme(arrowBox, { BackgroundColor3 = "Background3" })
+
+                local arrow = create("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromScale(1, 1),
+                    Text = "v",
+                    Font = Enum.Font.GothamBold,
+                    TextSize = 10,
+                    TextColor3 = ARES.Theme.DimText,
+                    Parent = arrowBox
+                })
+                bindTheme(arrow, { TextColor3 = "DimText" })
+
+                local dropdownFrame = create("ScrollingFrame", {
+                    BackgroundColor3 = ARES.Theme.Background2,
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(8, 51),
+                    Size = UDim2.new(1, -16, 0, 0),
+                    CanvasSize = UDim2.fromOffset(0, 0),
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                    ClipsDescendants = true,
+                    BorderSizePixel = 0,
+                    ScrollBarThickness = 3,
+                    ScrollBarImageColor3 = ARES.Theme.Accent,
+                    ScrollingDirection = Enum.ScrollingDirection.Y,
+                    ScrollingEnabled = true,
+                    Visible = false,
+                    Parent = base
+                }, {
+                    corner(6),
+                    padding(4, 4, 4, 4),
+                    listLayout(4, Enum.HorizontalAlignment.Left)
+                })
+                bindTheme(dropdownFrame, { BackgroundColor3 = "Background2", ScrollBarImageColor3 = "Accent" })
+                local dropdownStroke = stroke(ARES.Theme.Stroke, 1, 1)
+                dropdownStroke.Parent = dropdownFrame
+                local dropdownScale = create("UIScale", {
+                    Scale = 0.98,
+                    Parent = dropdownFrame
+                })
+                local optionButtons = {}
+
+                local api = {}
+
+                local function setOpen(state)
+                    open = state
+                    dropdownFrame.Visible = true
+                    arrow.Text = open and "^" or "v"
+                    if open then
+                        dropdownFrame.CanvasPosition = Vector2.new(0, 0)
+                    end
+
+                    tween(selectStroke, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Color = open and ARES.Theme.Accent or ARES.Theme.Stroke,
+                        Transparency = open and 0.45 or 0.35
+                    })
+
+                    local targetHeight = open and math.min(#values * 25 + 8, 120) or 0
+                    local targetBaseHeight = open and (58 + targetHeight) or 54
+
+                    tween(base, TweenInfo.new(0.16, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                        Size = UDim2.new(1, 0, 0, targetBaseHeight)
+                    })
+
+                    tween(dropdownScale, TweenInfo.new(0.16, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                        Scale = open and 1 or 0.98
+                    })
+
+                    tween(dropdownFrame, TweenInfo.new(0.16, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                        BackgroundTransparency = open and 0 or 1
+                    })
+
+                    tween(dropdownStroke, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Transparency = open and 0.35 or 1
+                    })
+
+                    tween(dropdownFrame, TweenInfo.new(0.16, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                        Size = UDim2.new(1, -16, 0, targetHeight)
+                    })
+
+                    if not open then
+                        task.delay(0.16, function()
+                            if dropdownFrame and dropdownFrame.Parent and not open then
+                                dropdownFrame.Visible = false
+                            end
+                        end)
+                    end
+                end
+
+                local function refresh()
+                    optionButtons = {}
+
+                    for _, child in ipairs(dropdownFrame:GetChildren()) do
+                        if child:IsA("TextButton") then
+                            child:Destroy()
+                        end
+                    end
+
+                    for _, option in ipairs(values) do
+                        local isSelected = option == selected
+                        local optionButton = create("TextButton", {
+                            BackgroundColor3 = isSelected and ARES.Theme.Accent or ARES.Theme.Background3,
+                            BackgroundTransparency = isSelected and 0.82 or 0.35,
+                            Size = UDim2.new(1, 0, 0, 21),
+                            Text = "",
+                            Font = Enum.Font.Gotham,
+                            TextSize = 9,
+                            TextColor3 = ARES.Theme.MutedText,
+                            AutoButtonColor = false,
+                            Parent = dropdownFrame
+                        }, {
+                            corner(4)
+                        })
+                        bindTheme(optionButton, { BackgroundColor3 = isSelected and "Accent" or "Background3" })
+
+                        local optionAccent = create("Frame", {
+                            BackgroundColor3 = ARES.Theme.Accent,
+                            BackgroundTransparency = isSelected and 0 or 1,
+                            BorderSizePixel = 0,
+                            Position = UDim2.fromOffset(5, 6),
+                            Size = UDim2.fromOffset(2, 9),
+                            Parent = optionButton
+                        }, {
+                            corner(2)
+                        })
+                        bindTheme(optionAccent, { BackgroundColor3 = "Accent" })
+
+                        local optionLabel = create("TextLabel", {
+                            BackgroundTransparency = 1,
+                            Position = UDim2.fromOffset(12, 0),
+                            Size = UDim2.new(1, -20, 1, 0),
+                            Text = tostring(option),
+                            Font = Enum.Font.GothamSemibold,
+                            TextSize = 9,
+                            TextColor3 = isSelected and ARES.Theme.Text or ARES.Theme.MutedText,
+                            TextXAlignment = Enum.TextXAlignment.Left,
+                            Parent = optionButton
+                        })
+                        bindTheme(optionLabel, { TextColor3 = isSelected and "Text" or "MutedText" })
+                        bindTranslation(optionLabel, "Text", tostring(option))
+
+                        table.insert(optionButtons, {
+                            Button = optionButton,
+                            Label = optionLabel,
+                            Accent = optionAccent,
+                            Value = option
+                        })
+
+                        optionButton.MouseEnter:Connect(function()
+                            local stillSelected = selected == option
+                            tween(optionButton, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                                BackgroundTransparency = stillSelected and 0.75 or 0.18
+                            })
+
+                            tween(optionAccent, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                                BackgroundTransparency = 0.1
+                            })
+                        end)
+
+                        optionButton.MouseLeave:Connect(function()
+                            local stillSelected = selected == option
+                            tween(optionButton, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                                BackgroundTransparency = stillSelected and 0.82 or 0.35
+                            })
+
+                            tween(optionAccent, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                                BackgroundTransparency = stillSelected and 0 or 1
+                            })
+                        end)
+
+                        optionButton.MouseButton1Click:Connect(function()
+                            api:Set(option)
+                            setOpen(false)
+                        end)
+                    end
+                end
+
+                function api:Set(valueToSet)
+                    selected = valueToSet
+                    bindTranslation(selectedLabel, "Text", tostring(selected))
+
+                    for _, item in ipairs(optionButtons) do
+                        local isSelected = item.Value == selected
+                        bindTheme(item.Button, { BackgroundColor3 = isSelected and "Accent" or "Background3" })
+                        bindTheme(item.Label, { TextColor3 = isSelected and "Text" or "MutedText" })
+
+                        tween(item.Button, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            BackgroundColor3 = isSelected and ARES.Theme.Accent or ARES.Theme.Background3,
+                            BackgroundTransparency = isSelected and 0.82 or 0.35
+                        })
+
+                        tween(item.Accent, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            BackgroundTransparency = isSelected and 0 or 1
+                        })
+
+                        tween(item.Label, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            TextColor3 = isSelected and ARES.Theme.Text or ARES.Theme.MutedText
+                        })
+                    end
+
+                    if flag then
+                        ARES.Flags[flag] = selected
+                    end
+
+                    if dropdownOptions.Callback then
+                        task.spawn(dropdownOptions.Callback, selected)
+                    end
+                end
+
+                function api:Get()
+                    return selected
+                end
+
+                function api:Refresh(newValues, keepSelected)
+                    values = newValues or {}
+                    if not keepSelected then
+                        selected = values[1] or "None"
+                        bindTranslation(selectedLabel, "Text", tostring(selected))
+                    end
+
+                    refresh()
+                end
+
+                selectButton.MouseButton1Click:Connect(function()
+                    setOpen(not open)
+                end)
+
+                selectButton.MouseEnter:Connect(function()
+                    tween(selectStroke, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Color = ARES.Theme.Accent,
+                        Transparency = 0.55
+                    })
+                end)
+
+                selectButton.MouseLeave:Connect(function()
+                    if not open then
+                        tween(selectStroke, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            Color = ARES.Theme.Stroke,
+                            Transparency = 0.35
+                        })
+                    end
+                end)
+
+                refresh()
+
+                return api
+            end
+
+            function section:CreateTextBox(textBoxOptions)
+                textBoxOptions = textBoxOptions or {}
+
+                local flag = textBoxOptions.Flag
+                local default = textBoxOptions.Default or ""
+
+                if flag then
+                    ARES.Flags[flag] = default
+                end
+
+                local base = controlBase(54)
+
+                local textboxLabel = create("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(8, 5),
+                    Size = UDim2.new(1, -16, 0, 12),
+                    Text = textBoxOptions.Name or "Target Name",
+                    Font = Enum.Font.GothamSemibold,
+                    TextSize = 10,
+                    TextColor3 = ARES.Theme.Text,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = base
+                })
+                bindTheme(textboxLabel, { TextColor3 = "Text" })
+                bindTranslation(textboxLabel, "Text", textBoxOptions.Name or "Target Name")
+
+                local box = create("TextBox", {
+                    BackgroundColor3 = ARES.Theme.Background2,
+                    Position = UDim2.fromOffset(8, 23),
+                    Size = UDim2.new(1, -16, 0, 18),
+                    Text = default,
+                    PlaceholderText = textBoxOptions.Placeholder or "username",
+                    PlaceholderColor3 = ARES.Theme.DimText,
+                    Font = Enum.Font.Gotham,
+                    TextSize = 9,
+                    TextColor3 = ARES.Theme.MutedText,
+                    ClearTextOnFocus = textBoxOptions.ClearTextOnFocus or false,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = base
+                }, {
+                    corner(3),
+                    padding(6, 6, 0, 0)
+                })
+                bindTheme(box, { BackgroundColor3 = "Background2", TextColor3 = "MutedText", PlaceholderColor3 = "DimText" })
+                bindTranslation(box, "PlaceholderText", textBoxOptions.Placeholder or "username")
+                local boxStroke = stroke(ARES.Theme.Stroke, 1, 0.35)
+                boxStroke.Parent = box
+
+                box.Focused:Connect(function()
+                    tween(boxStroke, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Color = ARES.Theme.Accent,
+                        Transparency = 0.45
+                    })
+                end)
+
+                local api = {}
+
+                function api:Set(valueToSet)
+                    box.Text = tostring(valueToSet)
+
+                    if flag then
+                        ARES.Flags[flag] = box.Text
+                    end
+
+                    if textBoxOptions.Callback then
+                        task.spawn(textBoxOptions.Callback, box.Text)
+                    end
+                end
+
+                function api:Get()
+                    return box.Text
+                end
+
+                box.FocusLost:Connect(function(enterPressed)
+                    tween(boxStroke, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Color = ARES.Theme.Stroke,
+                        Transparency = 0.35
+                    })
+
+                    if flag then
+                        ARES.Flags[flag] = box.Text
+                    end
+
+                    if textBoxOptions.Callback then
+                        task.spawn(textBoxOptions.Callback, box.Text, enterPressed)
+                    end
+                end)
+
+                return api
+            end
+
+            function section:CreateKeybind(keybindOptions)
+                keybindOptions = keybindOptions or {}
+
+                local currentKey = keybindOptions.Default or Enum.KeyCode.RightShift
+                local listening = false
+                local flag = keybindOptions.Flag
+
+                if flag then
+                    ARES.Flags[flag] = currentKey
+                end
+
+                local base = controlBase(34)
+
+                local keybindLabel = create("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(8, 0),
+                    Size = UDim2.new(1, -76, 1, 0),
+                    Text = keybindOptions.Name or "Key Bind",
+                    Font = Enum.Font.GothamSemibold,
+                    TextSize = 10,
+                    TextColor3 = ARES.Theme.Text,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = base
+                })
+                bindTheme(keybindLabel, { TextColor3 = "Text" })
+                bindTranslation(keybindLabel, "Text", keybindOptions.Name or "Key Bind")
+
+                local keyButton = create("TextButton", {
+                    AnchorPoint = Vector2.new(1, 0.5),
+                    BackgroundColor3 = ARES.Theme.Background2,
+                    Position = UDim2.new(1, -8, 0.5, 0),
+                    Size = UDim2.fromOffset(62, 18),
+                    Text = currentKey.Name,
+                    Font = Enum.Font.GothamBold,
+                    TextSize = 9,
+                    TextColor3 = ARES.Theme.MutedText,
+                    AutoButtonColor = false,
+                    Parent = base
+                }, {
+                    corner(3)
+                })
+                bindTheme(keyButton, { BackgroundColor3 = "Background2", TextColor3 = "MutedText" })
+                local keyStroke = stroke(ARES.Theme.Stroke, 1, 0.35)
+                keyStroke.Parent = keyButton
+
+                local api = {}
+
+                function api:Set(key)
+                    currentKey = key
+                    keyButton.Text = key.Name
+
+                    if flag then
+                        ARES.Flags[flag] = currentKey
+                    end
+                end
+
+                function api:Get()
+                    return currentKey
+                end
+
+                keyButton.MouseButton1Click:Connect(function()
+                    listening = true
+                    keyButton.Text = "..."
+                    tween(keyStroke, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Color = ARES.Theme.Accent,
+                        Transparency = 0.35
+                    })
+                end)
+
+                UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                    if gameProcessed then
+                        return
+                    end
+
+                    if listening and input.KeyCode ~= Enum.KeyCode.Unknown then
+                        listening = false
+                        api:Set(input.KeyCode)
+                        tween(keyStroke, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            Color = ARES.Theme.Stroke,
+                            Transparency = 0.35
+                        })
+                        return
+                    end
+
+                    if input.KeyCode == currentKey and keybindOptions.Callback then
+                        task.spawn(keybindOptions.Callback, currentKey)
+                    end
+                end)
+
+                return api
+            end
+
+            function section:CreateColorPicker(colorPickerOptions)
+                colorPickerOptions = colorPickerOptions or {}
+
+                local flag = colorPickerOptions.Flag
+                local value = colorPickerOptions.Default or Color3.fromRGB(41, 140, 255)
+
+                if flag then
+                    ARES.Flags[flag] = value
+                end
+
+                local base = controlBase(34)
+
+                local colorLabel = create("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(8, 0),
+                    Size = UDim2.new(1, -58, 1, 0),
+                    Text = colorPickerOptions.Name or "Sky Color",
+                    Font = Enum.Font.GothamSemibold,
+                    TextSize = 10,
+                    TextColor3 = ARES.Theme.Text,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = base
+                })
+                bindTheme(colorLabel, { TextColor3 = "Text" })
+                bindTranslation(colorLabel, "Text", colorPickerOptions.Name or "Sky Color")
+
+                local preview = create("TextButton", {
+                    AnchorPoint = Vector2.new(1, 0.5),
+                    BackgroundColor3 = value,
+                    Position = UDim2.new(1, -8, 0.5, 0),
+                    Size = UDim2.fromOffset(30, 12),
+                    Text = "",
+                    AutoButtonColor = false,
+                    Parent = base
+                }, {
+                    corner(4),
+                    stroke(ARES.Theme.Stroke2, 1, 0.2)
+                })
+
+                local popupWidth, popupHeight = 184, 190
+
+                local shadow = create("Frame", {
+                    BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+                    BackgroundTransparency = 0.55,
+                    BorderSizePixel = 0,
+                    Position = UDim2.fromOffset(3, 4),
+                    Size = UDim2.fromOffset(popupWidth, popupHeight),
+                    Visible = false,
+                    ZIndex = 199,
+                    Parent = ARES.ScreenGui
+                }, {
+                    corner(8)
+                })
+
+                local popup = create("Frame", {
+                    BackgroundColor3 = ARES.Theme.Background2,
+                    Size = UDim2.fromOffset(popupWidth, popupHeight),
+                    Visible = false,
+                    ZIndex = 200,
+                    Parent = ARES.ScreenGui
+                }, {
+                    corner(8),
+                    stroke(ARES.Theme.Stroke, 1, 0.05)
+                })
+                bindTheme(popup, { BackgroundColor3 = "Background2" })
+                local popupScale = create("UIScale", {
+                    Scale = 0.96,
+                    Parent = popup
+                })
+
+                local popupHeader = create("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(10, 7),
+                    Size = UDim2.new(1, -20, 0, 12),
+                    Text = colorPickerOptions.Name or "Color",
+                    Font = Enum.Font.GothamBold,
+                    TextSize = 9,
+                    TextColor3 = ARES.Theme.MutedText,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    ZIndex = 201,
+                    Parent = popup
+                })
+                bindTheme(popupHeader, { TextColor3 = "MutedText" })
+
+                local saturationValue = create("ImageButton", {
+                    BackgroundColor3 = Color3.fromRGB(255, 0, 0),
+                    BorderSizePixel = 0,
+                    Position = UDim2.fromOffset(10, 24),
+                    Size = UDim2.fromOffset(164, 96),
+                    AutoButtonColor = false,
+                    ZIndex = 201,
+                    Parent = popup
+                }, {
+                    corner(6)
+                })
+
+                local whiteGradient = create("UIGradient", {
+                    Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+                    }),
+                    Transparency = NumberSequence.new({
+                        NumberSequenceKeypoint.new(0, 0),
+                        NumberSequenceKeypoint.new(1, 1)
+                    })
+                })
+                whiteGradient.Parent = saturationValue
+
+                local blackGradient = create("Frame", {
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    BorderSizePixel = 0,
+                    Size = UDim2.fromScale(1, 1),
+                    ZIndex = 202,
+                    Parent = saturationValue
+                }, {
+                    corner(6),
+                    create("UIGradient", {
+                        Rotation = 90,
+                        Color = ColorSequence.new({
+                            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+                        }),
+                        Transparency = NumberSequence.new({
+                            NumberSequenceKeypoint.new(0, 1),
+                            NumberSequenceKeypoint.new(1, 0)
+                        })
+                    })
+                })
+
+                local pickerDot = create("Frame", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromScale(1, 0),
+                    Size = UDim2.fromOffset(8, 8),
+                    ZIndex = 203,
+                    Parent = saturationValue
+                }, {
+                    stroke(Color3.fromRGB(255, 255, 255), 2, 0),
+                    corner(8)
+                })
+
+                local hueBar = create("ImageButton", {
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    BorderSizePixel = 0,
+                    Position = UDim2.fromOffset(10, 128),
+                    Size = UDim2.fromOffset(164, 10),
+                    AutoButtonColor = false,
+                    ZIndex = 201,
+                    Parent = popup
+                }, {
+                    corner(5),
+                    create("UIGradient", {
+                        Color = ColorSequence.new({
+                            ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
+                            ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
+                            ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
+                            ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 255, 255)),
+                            ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0, 0, 255)),
+                            ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
+                            ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0))
+                        })
+                    })
+                })
+
+                local hueDot = create("Frame", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    Position = UDim2.fromScale(0, 0.5),
+                    Size = UDim2.fromOffset(5, 16),
+                    ZIndex = 202,
+                    Parent = hueBar
+                }, {
+                    corner(3)
+                })
+
+                local swatch = create("Frame", {
+                    BackgroundColor3 = value,
+                    Position = UDim2.fromOffset(10, 148),
+                    Size = UDim2.fromOffset(26, 22),
+                    ZIndex = 201,
+                    Parent = popup
+                }, {
+                    corner(5),
+                    stroke(ARES.Theme.Stroke, 1, 0.25)
+                })
+
+                local valueBox = create("TextBox", {
+                    BackgroundColor3 = ARES.Theme.Background3,
+                    Position = UDim2.fromOffset(44, 148),
+                    Size = UDim2.fromOffset(85, 22),
+                    Font = Enum.Font.GothamBold,
+                    TextSize = 9,
+                    TextColor3 = ARES.Theme.Text,
+                    Text = "",
+                    ClearTextOnFocus = false,
+                    ZIndex = 201,
+                    Parent = popup
+                }, {
+                    corner(5),
+                    stroke(ARES.Theme.Stroke, 1, 0.35)
+                })
+                bindTheme(valueBox, { BackgroundColor3 = "Background3", TextColor3 = "Text" })
+
+                local close = create("TextButton", {
+                    BackgroundColor3 = ARES.Theme.Background3,
+                    Position = UDim2.fromOffset(137, 148),
+                    Size = UDim2.fromOffset(37, 22),
+                    Text = "OK",
+                    Font = Enum.Font.GothamBold,
+                    TextSize = 9,
+                    TextColor3 = ARES.Theme.Accent,
+                    AutoButtonColor = false,
+                    ZIndex = 201,
+                    Parent = popup
+                }, {
+                    corner(5)
+                })
+                bindTheme(close, { BackgroundColor3 = "Background3", TextColor3 = "Accent" })
+
+                local hue, sat, val = value:ToHSV()
+                local draggingSv = false
+                local draggingHue = false
+                local isOpen = false
+                local api = {}
+
+                local function colorToHex(color)
+                    return string.format(
+                        "#%02x%02x%02x",
+                        math.floor(color.R * 255 + 0.5),
+                        math.floor(color.G * 255 + 0.5),
+                        math.floor(color.B * 255 + 0.5)
+                    )
+                end
+
+                local function setColor(color, fireCallback)
+                    value = color
+                    hue, sat, val = value:ToHSV()
+
+                    preview.BackgroundColor3 = value
+                    swatch.BackgroundColor3 = value
+                    saturationValue.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+                    pickerDot.Position = UDim2.fromScale(sat, 1 - val)
+                    hueDot.Position = UDim2.fromScale(hue, 0.5)
+                    valueBox.Text = colorToHex(value)
+
+                    if flag then
+                        ARES.Flags[flag] = value
+                    end
+
+                    if fireCallback and colorPickerOptions.Callback then
+                        task.spawn(colorPickerOptions.Callback, value)
+                    end
+                end
+
+                local function setFromSv(input)
+                    local x = clamp((input.Position.X - saturationValue.AbsolutePosition.X) / saturationValue.AbsoluteSize.X, 0, 1)
+                    local y = clamp((input.Position.Y - saturationValue.AbsolutePosition.Y) / saturationValue.AbsoluteSize.Y, 0, 1)
+                    sat = x
+                    val = 1 - y
+                    setColor(Color3.fromHSV(hue, sat, val), true)
+                end
+
+                local function setFromHue(input)
+                    hue = clamp((input.Position.X - hueBar.AbsolutePosition.X) / hueBar.AbsoluteSize.X, 0, 1)
+                    setColor(Color3.fromHSV(hue, sat, val), true)
+                end
+
+                local function pointInside(frame, x, y)
+                    local pos = frame.AbsolutePosition
+                    local size = frame.AbsoluteSize
+                    return x >= pos.X and x <= pos.X + size.X and y >= pos.Y and y <= pos.Y + size.Y
+                end
+
+                function api:Set(color)
+                    setColor(color, true)
+                end
+
+                function api:Get()
+                    return value
+                end
+
+                function api:Close()
+                    if not isOpen then
+                        return
+                    end
+
+                    isOpen = false
+
+                    if not ARES.AnimationsEnabled then
+                        popup.Visible = false
+                        popup.BackgroundTransparency = 0
+                        shadow.Visible = false
+                        shadow.BackgroundTransparency = 0.55
+                        popupScale.Scale = 1
+                        return
+                    end
+
+                    tween(popupScale, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                        Scale = 0.96
+                    })
+                    tween(popup, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                        BackgroundTransparency = 1
+                    })
+                    tween(shadow, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                        BackgroundTransparency = 1
+                    })
+
+                    task.delay(0.12, function()
+                        if not isOpen then
+                            if popup and popup.Parent then
+                                popup.Visible = false
+                                popup.BackgroundTransparency = 0
+                            end
+                            if shadow and shadow.Parent then
+                                shadow.Visible = false
+                                shadow.BackgroundTransparency = 0.55
+                            end
+                        end
+                    end)
+                end
+
+                local function openPopup()
+                    for _, picker in ipairs(ARES.OpenColorPickers) do
+                        if picker ~= api and picker.Close then
+                            picker:Close()
+                        end
+                    end
+
+                    local screenSize = ARES.ScreenGui.AbsoluteSize
+                    local absolute = preview.AbsolutePosition
+                    local buttonSize = preview.AbsoluteSize
+                    local margin = 8
+
+                    local targetX = absolute.X + buttonSize.X - popupWidth
+                    local targetY = absolute.Y + buttonSize.Y + 8
+
+                    if targetY + popupHeight > screenSize.Y - margin then
+                        targetY = absolute.Y - popupHeight - 8
+                    end
+
+                    targetY = clamp(targetY, margin, math.max(margin, screenSize.Y - popupHeight - margin))
+                    targetX = clamp(targetX, margin, math.max(margin, screenSize.X - popupWidth - margin))
+
+                    popup.Position = UDim2.fromOffset(targetX, targetY)
+                    shadow.Position = UDim2.fromOffset(targetX + 3, targetY + 4)
+
+                    isOpen = true
+                    popup.BackgroundTransparency = 1
+                    shadow.BackgroundTransparency = 1
+                    popupScale.Scale = 0.96
+                    popup.Visible = true
+                    shadow.Visible = true
+
+                    tween(popupScale, TweenInfo.new(0.16, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                        Scale = 1
+                    })
+                    tween(popup, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        BackgroundTransparency = 0
+                    })
+                    tween(shadow, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        BackgroundTransparency = 0.55
+                    })
+                end
+
+                preview.MouseButton1Click:Connect(function()
+                    if isOpen then
+                        api:Close()
+                    else
+                        openPopup()
+                    end
+                end)
+
+                close.MouseButton1Click:Connect(function()
+                    api:Close()
+                end)
+
+                UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                    if not isOpen then
+                        return
+                    end
+
+                    if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+                        return
+                    end
+
+                    local position = input.Position
+                    if pointInside(popup, position.X, position.Y) or pointInside(preview, position.X, position.Y) then
+                        return
+                    end
+
+                    api:Close()
+                end)
+
+                saturationValue.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        draggingSv = true
+                        tween(pickerDot, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            Size = UDim2.fromOffset(10, 10)
+                        })
+                        setFromSv(input)
+                    end
+                end)
+
+                hueBar.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        draggingHue = true
+                        tween(hueDot, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            Size = UDim2.fromOffset(5, 17)
+                        })
+                        setFromHue(input)
+                    end
+                end)
+
+                UserInputService.InputChanged:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                        if draggingSv then
+                            setFromSv(input)
+                        elseif draggingHue then
+                            setFromHue(input)
+                        end
+                    end
+                end)
+
+                UserInputService.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        draggingSv = false
+                        draggingHue = false
+                        tween(pickerDot, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            Size = UDim2.fromOffset(8, 8)
+                        })
+                        tween(hueDot, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            Size = UDim2.fromOffset(5, 16)
+                        })
+                    end
+                end)
+
+                valueBox.FocusLost:Connect(function()
+                    local hex = valueBox.Text:gsub("#", "")
+                    if #hex == 6 then
+                        local r = tonumber(hex:sub(1, 2), 16)
+                        local g = tonumber(hex:sub(3, 4), 16)
+                        local b = tonumber(hex:sub(5, 6), 16)
+
+                        if r and g and b then
+                            setColor(Color3.fromRGB(r, g, b), true)
+                        end
+                    else
+                        valueBox.Text = colorToHex(value)
+                    end
+                end)
+
+                table.insert(ARES.OpenColorPickers, api)
+                setColor(value, false)
+
+                return api
+            end
+
+            table.insert(tab.Sections, section)
+            section.Instance = holder
+            return section
+        end
+
+        table.insert(window.Tabs, tab)
+
+        if not window.ActiveTab then
+            setActive()
+        end
+
+        return tab
+    end
+
+    if options.StatusBar ~= false then
+        self:CreateStatusBar({
+            Text = options.WatermarkText or options.Title or title,
+            Icon = options.WatermarkIcon or options.Icon or "gem"
+        })
+    elseif options.Watermark ~= false then
+        self:CreateWatermark({
+            Text = options.WatermarkText or "This is a watermark",
+            Icon = options.WatermarkIcon or options.Icon or "gem"
+        })
+
+        if options.Stats ~= false then
+            self:CreateStatsPills()
+        end
+    end
+
+    main.Visible = true
+    main.GroupTransparency = 0
+    main.Position = position
+    mainScale.Scale = 1
+    return window
+end
+
+function ARES:GetThemes()
+    local names = {}
+
+    for name in pairs(ARES.Themes) do
+        table.insert(names, name)
+    end
+
+    table.sort(names)
+    return names
+end
+
+function ARES:SetTheme(theme)
+    local source = theme
+
+    if typeof(theme) == "string" then
+        source = ARES.Themes[theme]
+    end
+
+    if type(source) ~= "table" then
+        return false
+    end
+
+    for key, value in pairs(source) do
+        if ARES.Theme[key] ~= nil then
+            ARES.Theme[key] = value
+        end
+    end
+
+    applyThemeToRegistered()
+    return true
+end
+
+function ARES:GetLanguages()
+    local languages = {}
+
+    for language in pairs(ARES.LanguageTargets) do
+        table.insert(languages, language)
+    end
+
+    table.sort(languages)
+    return languages
+end
+
+function ARES:SetLanguage(language)
+    return setLanguage(language)
+end
+
+function ARES:GetLanguage()
+    return ARES.Language
+end
+
+function ARES:GetLanguageName(language)
+    return getLanguageName(language or ARES.Language)
+end
+
+function ARES:Translate(text, language)
+    return translateText(text, language)
+end
+
+function ARES:BindTranslation(instance, property, sourceText, formatter)
+    return bindTranslation(instance, property or "Text", sourceText, formatter)
+end
+
+function ARES:SetAutoTranslate(state)
+    ARES.AutoTranslate = state ~= false
+    applyTranslations()
+end
+
+function ARES:ClearTranslationCache(language)
+    if language then
+        local target = ARES.LanguageTargets[normalizeLanguage(language)]
+        if target then
+            ARES._TranslationCache[target] = {}
+        end
+    else
+        ARES._TranslationCache = {}
+    end
+
+    applyTranslations()
+end
+
+function ARES:SetLanguageTarget(language, targetCode)
+    language = normalizeLanguage(language)
+    ARES.LanguageTargets[language] = tostring(targetCode or "")
+    ARES._TranslationCache[ARES.LanguageTargets[language]] = ARES._TranslationCache[ARES.LanguageTargets[language]] or {}
+end
+
+function ARES:SetIconPack(iconPack)
+    ARES.IconPack = iconPack or "lucide"
+end
+
+function ARES:SetIconRaw(url)
+    ARES.IconRaw = url or ARES.IconRaw
+    ARES.IconModule = nil
+end
+
+function ARES:ResolveIcon(icon, iconType)
+    return resolveIcon(icon, iconType)
+end
+
+function ARES:CreateIcon(parent, icon, options)
+    return createIcon(parent, icon, options)
+end
+
+function ARES:GetFlag(flag)
+    return ARES.Flags[flag]
+end
+
+function ARES:SetFlag(flag, value)
+    ARES.Flags[flag] = value
+end
+
+function ARES:Destroy()
+    if self.ScreenGui then
+        self.ScreenGui:Destroy()
+    end
+end
+
+local function demo()
+    local Window = ARES:CreateWindow({
+        Title = "ARES",
+        SubTitle = "DaMenu",
+        Size = UDim2.fromOffset(575, 390),
+        Theme = "ARES",
+        Language = "ENG",
+        Languages = { "ENG", "SPA", "POR", "FRA", "GER", "RUS", "PHIL", "JPN", "KOR", "CHN" },
+        Icon = "gem",
+        WatermarkText = "ARES"
+    })
+
+    local Home = Window:CreateTab({ Name = "Home", Icon = "house" })
+    local Combat = Window:CreateTab({ Name = "Combat", Icon = "swords" })
+    local Visuals = Window:CreateTab({ Name = "Visuals", Icon = "eye" })
+    local Settings = Window:CreateTab({ Name = "Settings", Icon = "settings" })
+
+    local left = Home:CreateSection({ Name = "Primary", Icon = "layout-dashboard", Side = "Left" })
+    left:CreateToggle({
+        Name = "Enable Toggle",
+        Flag = "home_enabled",
+        Default = false,
+        Callback = function(value)
+            ARES:Notify({
+                Title = "Toggle",
+                Content = "home_enabled = " .. tostring(value),
+                Duration = 1.8,
+                Icon = "bell"
+            })
+        end
+    })
+
+    left:CreateSlider({
+        Name = "Slider Drag",
+        Flag = "slider_drag",
+        Min = 0,
+        Max = 100,
+        Default = 75,
+        Suffix = "%",
+        Callback = function() end
+    })
+
+    left:CreateDropdown({
+        Name = "Build Parts",
+        Flag = "build_part",
+        Values = { "Option1", "Option2", "Option3" },
+        Default = "Option3"
+    })
+
+    left:CreateButton({
+        Name = "Reset Settings",
+        Callback = function()
+            ARES:Notify({
+                Title = "Settings",
+                Content = "Values reset visually. Connect your own reset logic here.",
+                Duration = 2,
+                Icon = "refresh-cw"
+            })
+        end
+    })
+
+    left:CreateToggle({ Name = "Enable Toggle", Flag = "second_enabled" })
+    left:CreateSlider({ Name = "Slider Drag", Flag = "distance", Min = 0, Max = 250, Default = 188, Suffix = "ms" })
+    left:CreateButton({ Name = "Apply" })
+
+    local right = Home:CreateSection({ Name = "Secondary", Icon = "sliders-horizontal", Side = "Right" })
+    right:CreateToggle({ Name = "Enable Toggle", Flag = "right_enabled" })
+    right:CreateDropdown({
+        Name = "ESP Features",
+        Flag = "feature",
+        Values = { "Health, Distance", "Name", "Box", "Tracer" },
+        Default = "Health, Distance"
+    })
+    right:CreateTextBox({ Name = "Target Name", Flag = "target_name", Placeholder = "username" })
+    right:CreateColorPicker({
+        Name = "ESP Color",
+        Flag = "esp_color",
+        Default = Color3.fromRGB(27, 140, 243)
+    })
+    right:CreateToggle({ Name = "Enable Toggle", Flag = "right_second" })
+    right:CreateDropdown({
+        Name = "Build Parts",
+        Flag = "part_height",
+        Values = { "Low", "High", "Maximum" },
+        Default = "High"
+    })
+    right:CreateColorPicker({
+        Name = "Sky Color",
+        Flag = "sky_color",
+        Default = Color3.fromRGB(44, 126, 222)
+    })
+
+    local combatLeft = Combat:CreateSection({ Name = "Combat UI Samples", Icon = "swords", Side = "Left" })
+    combatLeft:CreateParagraph({
+        Title = "Callbacks only",
+        Content = "This tab demonstrates controls without adding gameplay automation."
+    })
+    combatLeft:CreateKeybind({
+        Name = "Menu Key",
+        Default = Enum.KeyCode.RightShift,
+        Callback = function()
+            Window:Toggle()
+        end
+    })
+    combatLeft:CreateButton({
+        Name = "Show Notification",
+        Callback = function()
+            ARES:Notify({
+                Title = "ARES",
+                Content = "Notification component is working.",
+                Duration = 3,
+                Icon = "bell"
+            })
+        end
+    })
+
+    local visualLeft = Visuals:CreateSection({ Name = "Theme", Icon = "palette", Side = "Left" })
+    visualLeft:CreateDropdown({
+        Name = "Theme Preset",
+        Values = ARES:GetThemes(),
+        Default = "ARES",
+        Callback = function(themeName)
+            ARES:SetTheme(themeName)
+        end
+    })
+    visualLeft:CreateColorPicker({
+        Name = "Accent Color",
+        Default = ARES.Theme.Accent,
+        Callback = function(color)
+            ARES.Theme.Accent = color
+            ARES:SetTheme(ARES.Theme)
+        end
+    })
+    visualLeft:CreateSlider({ Name = "Opacity", Min = 0, Max = 100, Default = 98, Suffix = "%" })
+
+    local settingsLeft = Settings:CreateSection({ Name = "Library", Icon = "settings", Side = "Left" })
+    settingsLeft:CreateLabel({ Text = "ARES UI Library v" .. ARES.Version })
+    settingsLeft:CreateButton({
+        Name = "Destroy UI",
+        Callback = function()
+            ARES:Destroy()
+        end
+    })
+
+    ARES:Notify({
+        Title = "ARES",
+        Content = "UI loaded successfully.",
+        Duration = 2.5,
+        Icon = "M"
+    })
+
+    return Window
+end
+
+ARES.Demo = demo
+
+return ARES
