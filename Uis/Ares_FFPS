@@ -12,7 +12,7 @@ local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer and LocalPlayer:GetMouse()
 
-ARES.Version = "2.4.1"
+ARES.Version = "2.4.2"
 ARES.AnimationsEnabled = false
 ARES.Flags = {}
 ARES.OpenColorPickers = {}
@@ -94,12 +94,12 @@ ARES.LanguagePhrases = {
         LanguagePartiallyApplied = "Sprache teilweise angewendet"
     },
     RUS = {
-        Settings = "Настройки",
-        Language = "Язык",
-        RemoveWatermark = "Скрыть водяной знак",
-        ApplyingLanguage = "Применение языка",
-        LanguageApplied = "Язык применен",
-        LanguagePartiallyApplied = "Язык применен частично"
+        Settings = "ÐÐ°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸",
+        Language = "Ð¯Ð·Ñ‹Ðº",
+        RemoveWatermark = "Ð¡ÐºÑ€Ñ‹Ñ‚ÑŒ Ð²Ð¾Ð´ÑÐ½Ð¾Ð¹ Ð·Ð½Ð°Ðº",
+        ApplyingLanguage = "ÐŸÑ€Ð¸Ð¼ÐµÐ½ÐµÐ½Ð¸Ðµ ÑÐ·Ñ‹ÐºÐ°",
+        LanguageApplied = "Ð¯Ð·Ñ‹Ðº Ð¿Ñ€Ð¸Ð¼ÐµÐ½ÐµÐ½",
+        LanguagePartiallyApplied = "Ð¯Ð·Ñ‹Ðº Ð¿Ñ€Ð¸Ð¼ÐµÐ½ÐµÐ½ Ñ‡Ð°ÑÑ‚Ð¸Ñ‡Ð½Ð¾"
     },
     PHIL = {
         Settings = "Mga Setting",
@@ -110,28 +110,28 @@ ARES.LanguagePhrases = {
         LanguagePartiallyApplied = "Bahagyang na-apply ang wika"
     },
     JPN = {
-        Settings = "設定",
-        Language = "言語",
-        RemoveWatermark = "透かしを非表示",
-        ApplyingLanguage = "言語を適用中",
-        LanguageApplied = "言語を適用しました",
-        LanguagePartiallyApplied = "言語を一部適用しました"
+        Settings = "è¨­å®š",
+        Language = "è¨€èªž",
+        RemoveWatermark = "é€ã‹ã—ã‚’éžè¡¨ç¤º",
+        ApplyingLanguage = "è¨€èªžã‚’é©ç”¨ä¸­",
+        LanguageApplied = "è¨€èªžã‚’é©ç”¨ã—ã¾ã—ãŸ",
+        LanguagePartiallyApplied = "è¨€èªžã‚’ä¸€éƒ¨é©ç”¨ã—ã¾ã—ãŸ"
     },
     KOR = {
-        Settings = "설정",
-        Language = "언어",
-        RemoveWatermark = "워터마크 숨기기",
-        ApplyingLanguage = "언어 적용 중",
-        LanguageApplied = "언어가 적용됨",
-        LanguagePartiallyApplied = "언어가 일부 적용됨"
+        Settings = "ì„¤ì •",
+        Language = "ì–¸ì–´",
+        RemoveWatermark = "ì›Œí„°ë§ˆí¬ ìˆ¨ê¸°ê¸°",
+        ApplyingLanguage = "ì–¸ì–´ ì ìš© ì¤‘",
+        LanguageApplied = "ì–¸ì–´ê°€ ì ìš©ë¨",
+        LanguagePartiallyApplied = "ì–¸ì–´ê°€ ì¼ë¶€ ì ìš©ë¨"
     },
     CHN = {
-        Settings = "设置",
-        Language = "语言",
-        RemoveWatermark = "隐藏水印",
-        ApplyingLanguage = "正在应用语言",
-        LanguageApplied = "语言已应用",
-        LanguagePartiallyApplied = "语言已部分应用"
+        Settings = "è®¾ç½®",
+        Language = "è¯­è¨€",
+        RemoveWatermark = "éšè—æ°´å°",
+        ApplyingLanguage = "æ­£åœ¨åº”ç”¨è¯­è¨€",
+        LanguageApplied = "è¯­è¨€å·²åº”ç”¨",
+        LanguagePartiallyApplied = "è¯­è¨€å·²éƒ¨åˆ†åº”ç”¨"
     }
 }
 
@@ -1399,20 +1399,16 @@ function ARES:CreateWindow(options)
     local windowIconValue = options.Icon or "gem"
     local windowIconIsAsset = isRbxAssetIcon(windowIconValue)
     local windowIconSurface = create("Frame", {
-        BackgroundColor3 = ARES.Theme.Background3,
+        BackgroundTransparency = 1,
         BorderSizePixel = 0,
-        Position = UDim2.fromOffset(6, 4),
-        Size = UDim2.fromOffset(32, 32),
+        Position = UDim2.fromOffset(3, 3),
+        Size = UDim2.fromOffset(34, 34),
         Parent = topBar
-    }, {
-        corner(5),
-        stroke(ARES.Theme.Stroke2, 1, 0.38)
     })
-    bindTheme(windowIconSurface, { BackgroundColor3 = "Background3" })
 
     createIcon(windowIconSurface, windowIconValue, {
-        Size = windowIconIsAsset and UDim2.fromOffset(28, 28) or UDim2.fromOffset(18, 18),
-        Position = windowIconIsAsset and UDim2.fromOffset(2, 2) or UDim2.fromOffset(7, 7),
+        Size = windowIconIsAsset and UDim2.fromOffset(34, 34) or UDim2.fromOffset(20, 20),
+        Position = windowIconIsAsset and UDim2.fromOffset(0, 0) or UDim2.fromOffset(7, 7),
         Color = windowIconIsAsset and Color3.fromRGB(255, 255, 255) or ARES.Theme.Accent,
         ThemeKey = windowIconIsAsset and nil or "Accent",
         Fallback = "M",
@@ -1421,7 +1417,7 @@ function ARES:CreateWindow(options)
 
     local titleLabel = create("TextLabel", {
         BackgroundTransparency = 1,
-        Position = UDim2.fromOffset(46, 0),
+        Position = UDim2.fromOffset(44, 0),
         Size = UDim2.fromOffset(170, 40),
         Text = title,
         Font = Enum.Font.GothamBlack,
@@ -1554,7 +1550,6 @@ function ARES:CreateWindow(options)
     local restoreButton = create("TextButton", {
         Name = "RestoreButton",
         AnchorPoint = Vector2.new(0, 0.5),
-        BackgroundColor3 = ARES.Theme.Background2,
         BackgroundTransparency = 1,
         Position = options.MinimizedIconPosition or UDim2.new(0, 18, 0.5, 0),
         Size = UDim2.fromOffset(42, 42),
@@ -1563,17 +1558,13 @@ function ARES:CreateWindow(options)
         Visible = false,
         ClipsDescendants = true,
         Parent = screenGui
-    }, {
-        corner(8),
-        stroke(ARES.Theme.Stroke, 1, 0.08)
     })
-    bindTheme(restoreButton, { BackgroundColor3 = "Background2" })
 
-    local minimizedIconValue = options.MinimizedIcon or options.FloatingIcon or options.RestoreIcon or "maximize-2"
+    local minimizedIconValue = options.MinimizedIcon or options.MinimizeIcon or options.FloatingIcon or options.RestoreIcon or "maximize-2"
     local minimizedIconIsAsset = isRbxAssetIcon(minimizedIconValue)
     local restoreIcon = createIcon(restoreButton, minimizedIconValue, {
-        Size = minimizedIconIsAsset and UDim2.fromOffset(30, 30) or UDim2.fromOffset(20, 20),
-        Position = minimizedIconIsAsset and UDim2.fromOffset(6, 6) or UDim2.fromOffset(11, 11),
+        Size = minimizedIconIsAsset and UDim2.fromOffset(38, 38) or UDim2.fromOffset(22, 22),
+        Position = minimizedIconIsAsset and UDim2.fromOffset(2, 2) or UDim2.fromOffset(10, 10),
         Color = minimizedIconIsAsset and Color3.fromRGB(255, 255, 255) or ARES.Theme.Accent,
         ThemeKey = minimizedIconIsAsset and nil or "Accent",
         Fallback = "R",
@@ -1600,14 +1591,14 @@ function ARES:CreateWindow(options)
 
     local function showRestoreButton()
         restoreButton.Visible = true
-        restoreButton.BackgroundTransparency = 0.02
+        restoreButton.BackgroundTransparency = 1
         restoreScale.Scale = 1
         setRestoreIconTransparency(0)
     end
 
     local function hideRestoreButton()
         restoreButton.Visible = false
-        restoreButton.BackgroundTransparency = 0.02
+        restoreButton.BackgroundTransparency = 1
         restoreScale.Scale = 1
         setRestoreIconTransparency(0)
     end
