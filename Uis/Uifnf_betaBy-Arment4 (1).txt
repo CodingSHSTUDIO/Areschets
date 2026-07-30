@@ -187,7 +187,7 @@ return (function()
 		return inst
 	end
 
-	local LIBRARY_VERSION = "0.22.4"
+	local LIBRARY_VERSION = "0.22.5"
 	local CONFIG_V2_SCHEMA = "FyyUI.Config.v2"
 	local MAX_CONFIG_JSON_BYTES = 64 * 1024
 	local MAX_CONFIG_VALUES = 512
@@ -7269,10 +7269,22 @@ return (function()
 			Font = Enum.Font.BuilderSansExtraBold,
 			TextSize = titleSize,
 			TextColor3 = theme.Accent,
+			TextStrokeColor3 = theme.AccentLine,
+			TextStrokeTransparency = 0.78,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Visible = false,
 			ZIndex = 2,
 			Parent = self.Topbar,
+		})
+		self._titleGradient = U.Create("UIGradient", {
+			Color = ColorSequence.new({
+				ColorSequenceKeypoint.new(0, theme.Accent),
+				ColorSequenceKeypoint.new(0.5, theme.AccentLine),
+				ColorSequenceKeypoint.new(1, theme.Accent),
+			}),
+			Rotation = 18,
+			Offset = Vector2.new(-1, 0),
+			Parent = self.TitleAccent,
 		})
 		self.Title = U.Create("TextLabel", {
 			Name = "Title",
@@ -7288,15 +7300,23 @@ return (function()
 			Parent = self.Topbar,
 		})
 		self._refreshTitle = function()
-			local branded = titleAlign ~= "Right" and self._titleText:sub(1, 3):lower() == "fyy"
+			local branded = titleAlign ~= "Right" and #self._titleText >= 3
 			self._titleBranded = branded
 			self.TitleAccent.Visible = branded
 			if branded then
 				local remainder = self._titleText:sub(4):gsub("^%s+", "")
-				self.TitleAccent.Text = self._titleText:sub(1, 3)
+				local initials = self._titleText:sub(1, 3)
+				local accentWidth = game:GetService("TextService"):GetTextSize(
+					initials,
+					titleSize,
+					Enum.Font.BuilderSansExtraBold,
+					Vector2.new(200, theme.TopbarHeight)
+				).X
+				self.TitleAccent.Text = initials
+				self.TitleAccent.Size = UDim2.fromOffset(accentWidth + 2, theme.TopbarHeight)
 				self.Title.Text = remainder
-				self.Title.Position = UDim2.fromOffset(titleX + 30 + titleGap, 0)
-				self.Title.Size = UDim2.new(1, -(titleX + 30 + titleGap + 40), 1, 0)
+				self.Title.Position = UDim2.fromOffset(titleX + accentWidth + titleGap, 0)
+				self.Title.Size = UDim2.new(1, -(titleX + accentWidth + titleGap + 40), 1, 0)
 			else
 				self.Title.Text = self._titleText
 				self.Title.Position = UDim2.fromOffset(titleX, 0)
@@ -7304,6 +7324,23 @@ return (function()
 			end
 		end
 		self._refreshTitle()
+		if not self._reducedMotion then
+			task.spawn(function()
+				while not self._destroyed and self._titleGradient and self._titleGradient.Parent do
+					self._titleGradient.Offset = Vector2.new(-1, 0)
+					local sweep = game:GetService("TweenService"):Create(
+						self._titleGradient,
+						TweenInfo.new(1.35, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+						{ Offset = Vector2.new(1, 0) }
+					)
+					sweep:Play()
+					sweep.Completed:Wait()
+					task.wait(0.18)
+				end
+			end)
+		else
+			self._titleGradient.Offset = Vector2.zero
+		end
 
 
 		self.AccentLine = U.Create("Frame", {
@@ -7528,7 +7565,7 @@ return (function()
 				Position = UDim2.new(0.5, -(floatingButtonSize / 2), 0.5, -(floatingButtonSize / 2)),
 				BackgroundColor3 = theme.Element,
 				BackgroundTransparency = 0,
-				Text = "â˜°",
+				Text = "☰",
 				Font = Enum.Font.GothamBold,
 				TextSize = 24,
 				TextColor3 = theme.TextPrimary,
@@ -8684,7 +8721,7 @@ return (function()
 		if ctrl.Flag then
 			ctrl._menu = self
 			if self._flagRegistry[ctrl.Flag] ~= nil then
-				warn(("[FyyUI] Duplicate Flag '%s' â€” overwriting previous controller"):format(ctrl.Flag))
+				warn(("[FyyUI] Duplicate Flag '%s' — overwriting previous controller"):format(ctrl.Flag))
 			end
 			self._flagRegistry[ctrl.Flag] = ctrl
 			local pending = self._pendingConfigValues and self._pendingConfigValues[ctrl.Flag]
@@ -10865,8 +10902,16 @@ return (function()
 		self.Title.TextSize = 17
 		if self.TitleAccent then
 			self.TitleAccent.TextColor3 = theme.Accent
+			self.TitleAccent.TextStrokeColor3 = theme.AccentLine
 			self.TitleAccent.Font = Enum.Font.BuilderSansExtraBold
 			self.TitleAccent.TextSize = 17
+		end
+		if self._titleGradient then
+			self._titleGradient.Color = ColorSequence.new({
+				ColorSequenceKeypoint.new(0, theme.Accent),
+				ColorSequenceKeypoint.new(0.5, theme.AccentLine),
+				ColorSequenceKeypoint.new(1, theme.Accent),
+			})
 		end
 		if self._refreshTitle then
 			self._refreshTitle()
