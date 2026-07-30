@@ -187,7 +187,7 @@ return (function()
 		return inst
 	end
 
-	local LIBRARY_VERSION = "0.22.2"
+	local LIBRARY_VERSION = "0.22.3"
 	local CONFIG_V2_SCHEMA = "FyyUI.Config.v2"
 	local MAX_CONFIG_JSON_BYTES = 64 * 1024
 	local MAX_CONFIG_VALUES = 512
@@ -6767,6 +6767,11 @@ return (function()
 		if requestedWindowLogo == nil then
 			requestedWindowLogo = options.TitleLogo
 		end
+		if requestedWindowLogo == nil and type(options.Logo) == "string" then
+			requestedWindowLogo = options.Logo
+		elseif requestedWindowLogo == nil and options.Logo == false then
+			requestedWindowLogo = false
+		end
 		local titleLogoAsset
 		if requestedWindowLogo == false then
 			titleLogoAsset = nil
@@ -7522,7 +7527,7 @@ return (function()
 				Position = UDim2.new(0.5, -25, 0.5, -25),
 				BackgroundColor3 = theme.Element,
 				BackgroundTransparency = 0,
-				Text = "â˜°",
+				Text = "☰",
 				Font = Enum.Font.GothamBold,
 				TextSize = 24,
 				TextColor3 = theme.TextPrimary,
@@ -8342,7 +8347,7 @@ return (function()
 			table.insert(themed, { kind = "avatar", frame = avatar, stroke = avatarStroke })
 			local displayName = player and player.DisplayName or "Player"
 			local userName = player and ("@" .. player.Name) or "@unknown"
-			local accountInfo = player and (("%d days Â· ID %d"):format(player.AccountAge, player.UserId))
+			local accountInfo = player and (("%d days | ID %d"):format(player.AccountAge, player.UserId))
 				or "Account unavailable"
 			label(
 				profile,
@@ -8379,7 +8384,7 @@ return (function()
 			)
 			label(
 				profile,
-				"â— Ready",
+				"Ready",
 				UDim2.new(1, -80, 0, 14),
 				UDim2.fromOffset(68, 18),
 				theme.FontBold,
@@ -8507,7 +8512,7 @@ return (function()
 			updatePlayers()
 			label(
 				serverCard,
-				"â— Connected",
+				"Connected",
 				UDim2.fromOffset(12, 51),
 				UDim2.new(1, -24, 0, 15),
 				theme.Font,
@@ -8675,7 +8680,7 @@ return (function()
 		if ctrl.Flag then
 			ctrl._menu = self
 			if self._flagRegistry[ctrl.Flag] ~= nil then
-				warn(("[FyyUI] Duplicate Flag '%s' â€” overwriting previous controller"):format(ctrl.Flag))
+				warn(("[FyyUI] Duplicate Flag '%s' — overwriting previous controller"):format(ctrl.Flag))
 			end
 			self._flagRegistry[ctrl.Flag] = ctrl
 			local pending = self._pendingConfigValues and self._pendingConfigValues[ctrl.Flag]
