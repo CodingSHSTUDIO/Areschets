@@ -187,7 +187,7 @@ return (function()
 		return inst
 	end
 
-	local LIBRARY_VERSION = "0.22.3"
+	local LIBRARY_VERSION = "0.22.4"
 	local CONFIG_V2_SCHEMA = "FyyUI.Config.v2"
 	local MAX_CONFIG_JSON_BYTES = 64 * 1024
 	local MAX_CONFIG_VALUES = 512
@@ -6767,11 +6767,6 @@ return (function()
 		if requestedWindowLogo == nil then
 			requestedWindowLogo = options.TitleLogo
 		end
-		if requestedWindowLogo == nil and type(options.Logo) == "string" then
-			requestedWindowLogo = options.Logo
-		elseif requestedWindowLogo == nil and options.Logo == false then
-			requestedWindowLogo = false
-		end
 		local titleLogoAsset
 		if requestedWindowLogo == false then
 			titleLogoAsset = nil
@@ -7430,6 +7425,12 @@ return (function()
 		self._activeNotifs = {}
 
 
+		local requestedFloatingSize = options.FloatingButtonSize
+		if not isFiniteNumber(requestedFloatingSize) then
+			requestedFloatingSize = math.max(58, self.TouchTargetSize + 12)
+		end
+		local floatingButtonSize = math.clamp(requestedFloatingSize, 48, 84)
+
 		if _logoImage then
 			self._minGui = U.Create("ScreenGui", {
 				Name = "FyyUI_Min",
@@ -7437,8 +7438,8 @@ return (function()
 				ResetOnSpawn = false,
 				Enabled = false,
 			})
-			local iconSize = 50
-			self._minInitialPos = UDim2.new(0, 16, 0.5, -(iconSize / 2))
+			local iconSize = floatingButtonSize
+			self._minInitialPos = UDim2.new(0, self.SafePadding, 0.5, -(iconSize / 2))
 			self._minFrame = U.Create("ImageButton", {
 				Name = "MinIcon",
 				Size = UDim2.fromOffset(iconSize, iconSize),
@@ -7451,7 +7452,7 @@ return (function()
 				Parent = self._minGui,
 			})
 			self._minScale = U.Create("UIScale", { Parent = self._minFrame, Scale = 1 })
-			U.Create("UICorner", { CornerRadius = UDim.new(0, 12), Parent = self._minFrame })
+			U.Create("UICorner", { CornerRadius = UDim.new(0, math.floor(iconSize * 0.24)), Parent = self._minFrame })
 			self._minStroke = U.Create("UIStroke", {
 				Color = theme.Accent,
 				Thickness = 2,
@@ -7467,12 +7468,12 @@ return (function()
 				self._minFrame,
 				"Icon",
 				minAssets,
-				UDim2.new(1, -4, 1, -4),
+				UDim2.new(1, -8, 1, -8),
 				UDim2.fromScale(0.5, 0.5),
 				Vector2.new(0.5, 0.5),
 				1
 			)
-			U.Create("UICorner", { CornerRadius = UDim.new(0, 10), Parent = minIcon })
+			U.Create("UICorner", { CornerRadius = UDim.new(0, math.floor(iconSize * 0.2)), Parent = minIcon })
 
 
 			local dragging, dragStart, startPos, didDrag
@@ -7523,18 +7524,21 @@ return (function()
 			})
 			self._noLogoRestoreBtn = U.Create("TextButton", {
 				Name = "RestoreBtn",
-				Size = UDim2.fromOffset(50, 50),
-				Position = UDim2.new(0.5, -25, 0.5, -25),
+				Size = UDim2.fromOffset(floatingButtonSize, floatingButtonSize),
+				Position = UDim2.new(0.5, -(floatingButtonSize / 2), 0.5, -(floatingButtonSize / 2)),
 				BackgroundColor3 = theme.Element,
 				BackgroundTransparency = 0,
-				Text = "☰",
+				Text = "â˜°",
 				Font = Enum.Font.GothamBold,
 				TextSize = 24,
 				TextColor3 = theme.TextPrimary,
 				AutoButtonColor = false,
 				Parent = self._noLogoRestoreGui,
 			})
-			U.Create("UICorner", { CornerRadius = UDim.new(0, 12), Parent = self._noLogoRestoreBtn })
+			U.Create("UICorner", {
+				CornerRadius = UDim.new(0, math.floor(floatingButtonSize * 0.24)),
+				Parent = self._noLogoRestoreBtn,
+			})
 			self._noLogoStroke = U.Create("UIStroke", {
 				Color = theme.Accent,
 				Thickness = 2,
@@ -8680,7 +8684,7 @@ return (function()
 		if ctrl.Flag then
 			ctrl._menu = self
 			if self._flagRegistry[ctrl.Flag] ~= nil then
-				warn(("[FyyUI] Duplicate Flag '%s' — overwriting previous controller"):format(ctrl.Flag))
+				warn(("[FyyUI] Duplicate Flag '%s' â€” overwriting previous controller"):format(ctrl.Flag))
 			end
 			self._flagRegistry[ctrl.Flag] = ctrl
 			local pending = self._pendingConfigValues and self._pendingConfigValues[ctrl.Flag]
