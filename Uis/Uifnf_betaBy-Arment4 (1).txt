@@ -6760,26 +6760,13 @@ return (function()
 
 	function Menu.new(options, theme)
 
-		local titleLogoResolved = resolveIcon("fyyui-title-logo")
 		local defaultFloatingResolved = resolveIcon("fyyui-floating-logo")
-		local defaultTitleLogoAsset = titleLogoResolved and titleLogoResolved.Image
-		local requestedWindowLogo = options.WindowLogo
-		if requestedWindowLogo == nil then
-			requestedWindowLogo = options.TitleLogo
-		end
-		local titleLogoAsset
-		if requestedWindowLogo == false then
-			titleLogoAsset = nil
-		elseif type(requestedWindowLogo) == "string" then
-			local resolved = resolveIcon(requestedWindowLogo)
-			titleLogoAsset = (resolved and resolved.Image) or requestedWindowLogo
-		else
-			titleLogoAsset = defaultTitleLogoAsset
-		end
+		
+		local titleLogoAsset = nil
 		local defaultFloatingLogoAsset = defaultFloatingResolved and defaultFloatingResolved.Image
-		local floatingLogoAsset
-		if options.Logo == true then
-			floatingLogoAsset = defaultFloatingLogoAsset
+		local floatingLogoAsset = defaultFloatingLogoAsset
+		if options.Logo == false then
+			floatingLogoAsset = nil
 		elseif type(options.Logo) == "string" then
 			local resolved = resolveIcon(options.Logo)
 			floatingLogoAsset = (resolved and resolved.Image) or options.Logo
