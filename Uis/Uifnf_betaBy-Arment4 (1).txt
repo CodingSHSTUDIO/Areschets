@@ -2305,7 +2305,6 @@ return (function()
 		["zodiac-virgo"] = "rbxassetid://99462994613661",
 
 
-		["fyyui-title-logo"] = "rbxassetid://90892630150011",
 		["fyyui-floating-logo"] = "rbxassetid://90051950241069",
 	}
 	end
@@ -6761,8 +6760,8 @@ return (function()
 	function Menu.new(options, theme)
 
 		local defaultFloatingResolved = resolveIcon("fyyui-floating-logo")
-		
-		local titleLogoAsset = nil
+		-- Keep the window header text-only. Branding is shown exclusively on
+		-- the floating restore button while the window is minimized.
 		local defaultFloatingLogoAsset = defaultFloatingResolved and defaultFloatingResolved.Image
 		local floatingLogoAsset = defaultFloatingLogoAsset
 		if options.Logo == false then
@@ -6772,7 +6771,6 @@ return (function()
 			floatingLogoAsset = (resolved and resolved.Image) or options.Logo
 		end
 		local preloadAssets = {}
-		if titleLogoAsset then table.insert(preloadAssets, titleLogoAsset) end
 		if floatingLogoAsset then table.insert(preloadAssets, floatingLogoAsset) end
 		local contentProvider = game:GetService("ContentProvider")
 		local pending = {}
@@ -7216,7 +7214,6 @@ return (function()
 		end
 
 
-		local _titleLogoAsset = titleLogoAsset
 		local function createLogo(parent, name, assets, size, position, anchorPoint, zidx)
 			local logo = U.Create("ImageLabel", {
 				Name = name,
@@ -7233,18 +7230,8 @@ return (function()
 			return logo
 		end
 
-		if _titleLogoAsset then
-			self.TitleLogo = createLogo(self.Topbar, "TitleLogo", { _titleLogoAsset, defaultFloatingLogoAsset },
-				UDim2.fromOffset(22, 22),
-				UDim2.fromOffset(leftMargin + 12, math.floor((theme.TopbarHeight - 22) / 2)),
-				nil,
-				2
-			)
-		end
-
-
 		self._titleText = options.Title or "FyyUI"
-		local titleX = _titleLogoAsset and (leftMargin + 42) or (leftMargin + 12)
+		local titleX = leftMargin + 12
 		local titleSize = 17
 		local titleGap = 5
 		self.TitleAccent = U.Create("TextLabel", {
@@ -7552,7 +7539,7 @@ return (function()
 				Position = UDim2.new(0.5, -(floatingButtonSize / 2), 0.5, -(floatingButtonSize / 2)),
 				BackgroundColor3 = theme.Element,
 				BackgroundTransparency = 0,
-				Text = "☰",
+				Text = "â˜°",
 				Font = Enum.Font.GothamBold,
 				TextSize = 24,
 				TextColor3 = theme.TextPrimary,
@@ -8708,7 +8695,7 @@ return (function()
 		if ctrl.Flag then
 			ctrl._menu = self
 			if self._flagRegistry[ctrl.Flag] ~= nil then
-				warn(("[FyyUI] Duplicate Flag '%s' — overwriting previous controller"):format(ctrl.Flag))
+				warn(("[FyyUI] Duplicate Flag '%s' â€” overwriting previous controller"):format(ctrl.Flag))
 			end
 			self._flagRegistry[ctrl.Flag] = ctrl
 			local pending = self._pendingConfigValues and self._pendingConfigValues[ctrl.Flag]
@@ -10061,9 +10048,6 @@ return (function()
 		end
 		if self.SidebarLine then
 			self.SidebarLine.Visible = visible
-		end
-		if self.TitleLogo then
-			self.TitleLogo.Visible = visible
 		end
 		if self.TitleAccent then
 			self.TitleAccent.Visible = visible and self._titleBranded
