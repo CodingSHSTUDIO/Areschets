@@ -233,6 +233,13 @@ return (function()
 		end
 		if c == "TextLabel" and inst.Name == "Description" then
 			makeDescriptionResponsive(inst)
+		elseif
+			c == "TextLabel"
+			and (inst.Name == "Label" or inst.Name == "Text")
+			and (not props or props.TextTruncate == nil)
+			and not inst.TextWrapped
+		then
+			inst.TextTruncate = Enum.TextTruncate.AtEnd
 		end
 		return inst
 	end
@@ -7412,6 +7419,7 @@ return (function()
 			Position = UDim2.new(0, 2, 0, theme.TopbarHeight + 4),
 			BackgroundColor3 = theme.Sidebar,
 			BorderSizePixel = 0,
+			ClipsDescendants = true,
 			Parent = self.Frame,
 		})
 		U.Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = self.Sidebar })
@@ -7827,8 +7835,17 @@ return (function()
 		end
 
 		local scrollY = self.SidebarList and self.SidebarList.CanvasPosition.Y or 0
-		local position = UDim2.fromOffset(5, (tabIdx - 1) * 40 + 9 - scrollY)
+		local barY = (tabIdx - 1) * 40 + 9 - scrollY
+		local position = UDim2.fromOffset(5, barY)
+		local viewportHeight = self.SidebarList and self.SidebarList.AbsoluteSize.Y or 0
+		local barHeight = math.max(self.ActiveBar.Size.Y.Offset, self.ActiveBar.AbsoluteSize.Y)
+		local isInsideViewport = viewportHeight <= 0 or (barY + barHeight > 0 and barY < viewportHeight)
+		self.ActiveBar.Visible = isInsideViewport
 		self.ActiveBar.BackgroundTransparency = 0
+		if not isInsideViewport then
+			self.ActiveBar.Position = position
+			return
+		end
 		if animate then
 			local tween = self:_transition(self.ActiveBar, 0.22, { Position = position })
 			self._activeBarTween = tween
