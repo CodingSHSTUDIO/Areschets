@@ -172,6 +172,53 @@ return (function()
 
 	local U = {}
 
+	local function makeDescriptionResponsive(label)
+		local parent = label.Parent
+		if not parent or not parent:IsA("GuiObject") then
+			return
+		end
+
+		local baseDescriptionHeight = math.max(16, label.Size.Y.Offset)
+		local baseParentYScale = parent.Size.Y.Scale
+		local baseParentHeight = parent.Size.Y.Offset
+		local updateQueued = false
+
+		label.TextWrapped = true
+		label.TextYAlignment = Enum.TextYAlignment.Top
+		label.AutomaticSize = Enum.AutomaticSize.Y
+
+		local function updateHeight()
+			updateQueued = false
+			if not label.Parent or label.Parent ~= parent then
+				return
+			end
+
+			local measuredHeight = math.max(baseDescriptionHeight, math.ceil(label.TextBounds.Y))
+			local growth = math.max(0, measuredHeight - baseDescriptionHeight)
+			local managedBaseHeight = parent:GetAttribute("FyyDescriptionBaseHeight") or baseParentHeight
+			local expectedHeight = managedBaseHeight + growth
+			parent:SetAttribute("FyyDescriptionGrowth", growth)
+
+			local current = parent.Size
+			if current.Y.Scale ~= baseParentYScale or current.Y.Offset ~= expectedHeight then
+				parent.Size = UDim2.new(current.X.Scale, current.X.Offset, baseParentYScale, expectedHeight)
+			end
+		end
+
+		local function queueUpdate()
+			if updateQueued then
+				return
+			end
+			updateQueued = true
+			task.defer(updateHeight)
+		end
+
+		label:GetPropertyChangedSignal("TextBounds"):Connect(queueUpdate)
+		label:GetPropertyChangedSignal("AbsoluteSize"):Connect(queueUpdate)
+
+		queueUpdate()
+	end
+
 	function U.Create(c, props, children)
 		local inst = Instance.new(c)
 		if props then
@@ -183,6 +230,9 @@ return (function()
 			for _, ch in ipairs(children) do
 				ch.Parent = inst
 			end
+		end
+		if c == "TextLabel" and inst.Name == "Description" then
+			makeDescriptionResponsive(inst)
 		end
 		return inst
 	end
@@ -2377,7 +2427,7 @@ return (function()
 		self.Track = U.Create("ImageButton", {
 			Name = "Track",
 			Size = UDim2.fromOffset(18, 18),
-			Position = UDim2.new(1, -30, 0.5, -9),
+			Position = self.HasDesc and UDim2.new(1, -30, 0, 20) or UDim2.new(1, -30, 0.5, -9),
 			BackgroundColor3 = self.Value and theme.ToggleOn or theme.ToggleOff,
 			AutoButtonColor = false,
 			Parent = self.Container,
@@ -2804,6 +2854,10 @@ return (function()
 			ClipsDescendants = true,
 			Parent = parent,
 		})
+		self.Container:SetAttribute(
+			"FyyDescriptionBaseHeight",
+			self.Open and self._openHeight or self._closedHeight
+		)
 		U.Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = self.Container })
 		U.Create("UIStroke", {
 			Color = theme.ElementBorder,
@@ -2865,6 +2919,14 @@ return (function()
 			Visible = self.Open,
 			Parent = self.Container,
 		})
+		local function updateDescriptionLayout()
+			local descriptionGrowth = self.Container:GetAttribute("FyyDescriptionGrowth") or 0
+			self.PickerArea.Position = UDim2.new(0.5, -64, 0, self._closedHeight + descriptionGrowth + 2)
+			local targetHeight = (self.Open and self._openHeight or self._closedHeight) + descriptionGrowth
+			self.Container.Size = UDim2.new(1, -12, 0, targetHeight)
+		end
+		self.Container:GetAttributeChangedSignal("FyyDescriptionGrowth"):Connect(updateDescriptionLayout)
+		task.defer(updateDescriptionLayout)
 		local squareSize = 88
 		self.SV = U.Create("ImageButton", {
 			Name = "SaturationValue",
@@ -3062,10 +3124,15 @@ return (function()
 			return false, "destroyed"
 		end
 		self.Open = open == true
+		self.Container:SetAttribute(
+			"FyyDescriptionBaseHeight",
+			self.Open and self._openHeight or self._closedHeight
+		)
 		if self.Open then
 			self.PickerArea.Visible = true
 		end
-		local target = self.Open and self._openHeight or self._closedHeight
+		local descriptionGrowth = self.Container:GetAttribute("FyyDescriptionGrowth") or 0
+		local target = (self.Open and self._openHeight or self._closedHeight) + descriptionGrowth
 		if self._sizeTween then
 			self._sizeTween:Cancel()
 		end
@@ -3827,7 +3894,7 @@ return (function()
 		self.CaptureBtn = U.Create("TextButton", {
 			Name = "CaptureBtn",
 			Size = UDim2.fromOffset(btnW, 26),
-			Position = UDim2.new(1, -btnOff, 0.5, -13),
+			Position = self.HasDesc and UDim2.new(1, -btnOff, 0, 16) or UDim2.new(1, -btnOff, 0.5, -13),
 			BackgroundColor3 = theme.ElementHover,
 			BackgroundTransparency = 0,
 			Text = "",
@@ -4152,7 +4219,7 @@ return (function()
 		self.TextBox = U.Create("TextBox", {
 			Name = "TextBox",
 			Size = UDim2.fromOffset(textBoxW, 26),
-			Position = UDim2.new(1, -textBoxOff, 0.5, -13),
+			Position = self.HasDesc and UDim2.new(1, -textBoxOff, 0, 16) or UDim2.new(1, -textBoxOff, 0.5, -13),
 			BackgroundColor3 = theme.ElementHover,
 			BackgroundTransparency = 0,
 			Text = "",
@@ -4355,7 +4422,8 @@ return (function()
 		self.Box = U.Create("Frame", {
 			Name = "Box",
 			Size = UDim2.fromOffset(boxSize, boxSize),
-			Position = UDim2.new(1, -(boxSize + 12), 0.5, -boxSize / 2),
+			Position = self.HasDesc and UDim2.new(1, -(boxSize + 12), 0, 20)
+				or UDim2.new(1, -(boxSize + 12), 0.5, -boxSize / 2),
 			BackgroundColor3 = self.Value and theme.ToggleOn or theme.ToggleOff,
 			BackgroundTransparency = 0,
 			Parent = self.Container,
@@ -4671,14 +4739,14 @@ return (function()
 		renderIcon(btn.Container, opts.Icon or "rocket", {
 			Name = "Pointer",
 			Size = UDim2.fromOffset(26, 26),
-			Position = UDim2.new(1, -38, 0.5, -13),
+			Position = hasDesc and UDim2.new(1, -38, 0, 16) or UDim2.new(1, -38, 0.5, -13),
 			ImageTransparency = 0.5,
 		})
 		local ix = 10
 		if hasDesc then
 			U.Create("TextLabel", {
 				Name = "Text",
-				Size = UDim2.new(1, -20, 0, 20),
+				Size = UDim2.new(1, -54, 0, 20),
 				Position = UDim2.fromOffset(ix, 5),
 				BackgroundTransparency = 1,
 				Text = opts.Text or "Button",
@@ -4690,7 +4758,7 @@ return (function()
 			})
 			U.Create("TextLabel", {
 				Name = "Description",
-				Size = UDim2.new(1, -20, 0, 16),
+				Size = UDim2.new(1, -54, 0, 16),
 				Position = UDim2.fromOffset(ix, 27),
 				BackgroundTransparency = 1,
 				Text = opts.Description,
@@ -4704,7 +4772,7 @@ return (function()
 		else
 			U.Create("TextLabel", {
 				Name = "Text",
-				Size = UDim2.new(1, -20, 0, 20),
+				Size = UDim2.new(1, -54, 0, 20),
 				Position = UDim2.fromOffset(ix, (h + 6 - 20) / 2 + 1),
 				BackgroundTransparency = 1,
 				Text = opts.Text or "Button",
@@ -5544,14 +5612,14 @@ return (function()
 		renderIcon(btn.Container, opts.Icon or "rocket", {
 			Name = "Pointer",
 			Size = UDim2.fromOffset(26, 26),
-			Position = UDim2.new(1, -38, 0.5, -13),
+			Position = hasDesc and UDim2.new(1, -38, 0, 16) or UDim2.new(1, -38, 0.5, -13),
 			ImageTransparency = 0.5,
 		})
 		local ix = 10
 		if hasDesc then
 			U.Create("TextLabel", {
 				Name = "Text",
-				Size = UDim2.new(1, -20, 0, 20),
+				Size = UDim2.new(1, -54, 0, 20),
 				Position = UDim2.fromOffset(ix, 5),
 				BackgroundTransparency = 1,
 				Text = opts.Text or "Button",
@@ -5563,7 +5631,7 @@ return (function()
 			})
 			U.Create("TextLabel", {
 				Name = "Description",
-				Size = UDim2.new(1, -20, 0, 16),
+				Size = UDim2.new(1, -54, 0, 16),
 				Position = UDim2.fromOffset(ix, 27),
 				BackgroundTransparency = 1,
 				Text = opts.Description,
@@ -5577,7 +5645,7 @@ return (function()
 		else
 			U.Create("TextLabel", {
 				Name = "Text",
-				Size = UDim2.new(1, -20, 0, 20),
+				Size = UDim2.new(1, -54, 0, 20),
 				Position = UDim2.fromOffset(ix, (h + 6 - 20) / 2 + 1),
 				BackgroundTransparency = 1,
 				Text = opts.Text or "Button",
@@ -6032,7 +6100,7 @@ return (function()
 		renderIcon(btn.Container, options.Icon or "rocket", {
 			Name = "Pointer",
 			Size = UDim2.fromOffset(26, 26),
-			Position = UDim2.new(1, -38, 0.5, -13),
+			Position = hasDesc and UDim2.new(1, -38, 0, 16) or UDim2.new(1, -38, 0.5, -13),
 			ImageTransparency = 0.5,
 		})
 		local btnIconX = 10
